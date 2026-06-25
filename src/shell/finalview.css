@@ -1,0 +1,35 @@
+.modal {
+  position: fixed; inset: 0; background: rgba(18, 22, 28, .62);
+  display: flex; align-items: flex-start; justify-content: center;
+  padding: 24px 14px; overflow-y: auto; z-index: 50;
+}
+.sheet {
+  background: #fff; border-radius: 12px;
+  max-width: 760px; width: 100%;
+  box-shadow: 0 18px 50px rgba(0, 0, 0, .35); overflow: hidden;
+}
+.sh-h {
+  background: var(--steel-900); color: #fff;
+  padding: 16px 20px;
+  display: flex; align-items: center; justify-content: space-between;
+}
+.sh-h h2 { margin: 0; font-size: 16px; text-transform: uppercase; letter-spacing: .04em; }
+.sh-h .x {
+  background: none; border: none; color: #cbd2d9;
+  font-size: 22px; cursor: pointer; line-height: 1;
+}
+.sh-h .x:focus-visible { outline: 2px solid var(--gold); outline-offset: 2px; }
+.sh-b { padding: 18px 20px; display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+@media (max-width: 640px) { .sh-b { grid-template-columns: 1fr; } }
+.spec { font-family: var(--mono); font-size: 12px; }
+.spec h4 {
+  font-family: var(--sans); font-size: 11px;
+  letter-spacing: .14em; text-transform: uppercase;
+  color: var(--gold-d); margin: 0 0 6px;
+}
+.spec .row {
+  display: flex; justify-content: space-between;
+  padding: 5px 0; border-bottom: 1px solid #eef1f4; gap: 12px;
+}
+.spec .row .k { color: var(--muted); }
+.spec .row .v { font-weight: 600; text-align: right; }

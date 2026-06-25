@@ -1,0 +1,432 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Armá tu estación en L · SoluPark — Golden Line</title>
+<style>
+  :root{
+    --ink:#14161b;--steel-900:#15171c;--steel-800:#1d2026;--steel-700:#262a31;
+    --line:#363c45;--paper:#e8eaed;--card:#fff;
+    --silver:#aeb6c0;--silver-d:#868f9b;--silver-l:#cdd3da;
+    --gold:#d99327;--gold-d:#b3751a;--gold-soft:#fbeed6;
+    --ok:#2f9466;--ok-soft:#dcefe6;--warn:#ec5a23;--warn-soft:#fbe3d8;
+    --muted:#6f7884;--muted-l:#9aa2ad;
+    --sans:-apple-system,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+    --mono:ui-monospace,"SF Mono","Menlo","Consolas",monospace;
+  }
+  *{box-sizing:border-box;}
+  html,body{margin:0;}
+  body{font-family:var(--sans);color:var(--ink);background:var(--paper);
+    background-image:linear-gradient(rgba(120,130,145,.06) 1px,transparent 1px),linear-gradient(90deg,rgba(120,130,145,.06) 1px,transparent 1px);
+    background-size:22px 22px;-webkit-font-smoothing:antialiased;line-height:1.45;}
+  .wrap{max-width:1200px;margin:0 auto;padding:0 16px 70px;}
+  header{background:var(--steel-900);color:#eef1f4;margin:0 -16px;padding:20px 16px 0;border-bottom:3px solid var(--gold);}
+  .hi{max-width:1200px;margin:0 auto;}
+  .brand{display:flex;align-items:baseline;gap:10px;flex-wrap:wrap;}
+  .brand .sp{font-weight:800;letter-spacing:.02em;font-size:18px;}
+  .brand .gl{font-family:var(--mono);font-size:11px;letter-spacing:.28em;color:var(--gold);text-transform:uppercase;}
+  h1{font-size:26px;line-height:1.05;margin:8px 0 0;font-weight:800;text-transform:uppercase;letter-spacing:-.01em;}
+  h1 .t{font-weight:300;color:var(--silver);}
+  .sub{color:var(--muted-l);font-size:13.5px;margin:7px 0 0;max-width:66ch;}
+  .readout{display:flex;flex-wrap:wrap;gap:1px;background:var(--line);border:1px solid var(--line);margin:18px 0 -22px;border-radius:7px 7px 0 0;overflow:hidden;}
+  .ro{background:var(--steel-800);padding:10px 14px;flex:1 1 110px;min-width:104px;}
+  .ro .k{font-family:var(--mono);font-size:9.5px;letter-spacing:.14em;text-transform:uppercase;color:var(--muted-l);}
+  .ro .v{font-family:var(--mono);font-size:17px;font-weight:600;color:#fff;margin-top:3px;}
+  .ro .v small{font-size:11px;color:var(--silver);font-weight:400;}
+  .ro .v.over{color:#ff8a5c;} .ro .v.ok{color:#7bd1a6;}
+  .grid{display:grid;grid-template-columns:266px 1fr;gap:18px;margin-top:34px;}
+  @media (max-width:920px){.grid{grid-template-columns:1fr;}}
+  .panel{background:var(--card);border:1px solid #cfd5db;border-radius:9px;box-shadow:0 2px 8px rgba(20,30,45,.05);}
+  .ph{padding:12px 15px;border-bottom:1px solid #e4e8ec;display:flex;align-items:center;justify-content:space-between;gap:8px;flex-wrap:wrap;}
+  .ph h2{margin:0;font-size:12px;letter-spacing:.15em;text-transform:uppercase;color:var(--muted);font-weight:700;}
+  .seg{display:inline-flex;background:#eef1f4;border-radius:7px;padding:3px;gap:2px;}
+  .seg button{border:none;background:none;font-family:var(--sans);font-size:12px;font-weight:600;padding:5px 12px;border-radius:5px;cursor:pointer;color:var(--muted);}
+  .seg button.on{background:#fff;color:var(--gold-d);box-shadow:0 1px 3px rgba(0,0,0,.12);}
+  .seg button:focus-visible{outline:2px solid var(--gold);outline-offset:2px;}
+  .cat{padding:11px 12px 3px;} .cat h3{margin:0 0 7px;font-family:var(--mono);font-size:9.5px;letter-spacing:.2em;text-transform:uppercase;color:var(--gold-d);}
+  .mods{display:flex;flex-direction:column;gap:6px;}
+  .mod{display:grid;grid-template-columns:30px 1fr auto;gap:9px;align-items:center;width:100%;text-align:left;background:#fafbfc;border:1px solid #d8dee4;border-radius:7px;padding:7px 9px;cursor:pointer;font-family:inherit;transition:border-color .12s,box-shadow .12s,transform .08s;}
+  .mod:hover{border-color:var(--gold);box-shadow:0 2px 8px rgba(217,147,39,.16);}
+  .mod:active{transform:translateY(1px);} .mod:focus-visible{outline:2px solid var(--gold);outline-offset:2px;}
+  .mod .g{width:30px;height:36px;}
+  .mod .code{font-family:var(--mono);font-size:10px;color:var(--muted);}
+  .mod .nm{font-size:12px;font-weight:600;line-height:1.12;margin-top:1px;}
+  .mod .dim{font-family:var(--mono);font-size:10px;color:var(--muted-l);margin-top:1px;}
+  .mod .add{font-family:var(--mono);font-size:16px;color:var(--gold-d);font-weight:700;}
+  .ov{display:flex;align-items:center;justify-content:space-between;padding:6px 9px;border:1px solid #d8dee4;border-radius:7px;background:#fafbfc;margin-bottom:6px;}
+  .ov label{font-size:12px;font-weight:600;display:flex;flex-direction:column;}
+  .ov label small{font-family:var(--mono);font-size:9.5px;color:var(--muted-l);font-weight:400;}
+  .sw{position:relative;width:36px;height:20px;flex:none;}
+  .sw input{opacity:0;width:0;height:0;} .sw span{position:absolute;inset:0;background:#cbd2d9;border-radius:20px;transition:.15s;cursor:pointer;}
+  .sw span:before{content:"";position:absolute;height:14px;width:14px;left:3px;top:3px;background:#fff;border-radius:50%;transition:.15s;}
+  .sw input:checked+span{background:var(--gold);} .sw input:checked+span:before{transform:translateX(16px);}
+  .sw input:focus-visible+span{outline:2px solid var(--gold);outline-offset:2px;}
+  .field{display:flex;align-items:center;gap:7px;margin:8px 12px;}
+  .field label{font-family:var(--mono);font-size:10.5px;text-transform:uppercase;color:var(--muted);min-width:64px;}
+  .field input{width:80px;font-family:var(--mono);font-size:13px;padding:6px 8px;border:1px solid #c8cfd6;border-radius:6px;}
+  .field input:focus-visible{outline:2px solid var(--gold);outline-offset:1px;border-color:var(--gold);}
+  .btn{font-family:var(--sans);font-size:12px;font-weight:600;padding:6px 11px;border-radius:6px;border:1px solid #c8cfd6;background:#fff;cursor:pointer;color:var(--ink);}
+  .btn:hover{border-color:var(--gold);color:var(--gold-d);} .btn:focus-visible{outline:2px solid var(--gold);outline-offset:2px;}
+  .btn.ghost{border-style:dashed;color:var(--muted);}
+  .btn.cta{background:var(--gold);border-color:var(--gold);color:#1b1205;font-weight:700;}
+  .btn.cta:hover{background:var(--gold-d);color:#fff;}
+  .btn.wa{background:#25d366;border-color:#1da851;color:#06330f;font-weight:700;}
+  .btn.wa:hover{background:#1da851;color:#fff;}
+  .stage{position:relative;background:var(--steel-800);padding:14px;overflow:auto;}
+  .stage svg{display:block;margin:0 auto;}
+  .stage-lbl{font-family:var(--mono);font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:var(--silver-d);padding:8px 14px 0;}
+  .run-wrap{padding:10px 15px;border-top:1px solid #e4e8ec;}
+  .run-wrap h4{margin:0 0 6px;font-family:var(--mono);font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:var(--muted);}
+  .run{display:flex;flex-wrap:wrap;gap:6px;min-height:8px;}
+  .chip{display:inline-flex;align-items:center;gap:6px;background:#f3f5f7;border:1px solid #d6dce2;border-radius:20px;padding:4px 5px 4px 10px;font-size:12px;}
+  .chip.cor{background:var(--gold-soft);border-color:#e6c896;}
+  .chip .c{font-family:var(--mono);font-size:10px;color:var(--muted);}
+  .chip button{border:none;background:#e4e8ec;width:20px;height:20px;border-radius:50%;cursor:pointer;font-size:12px;color:var(--muted);display:grid;place-items:center;}
+  .chip button:hover{background:var(--warn);color:#fff;}
+  .empty-hint{font-size:11.5px;color:var(--muted-l);font-style:italic;}
+  table{width:100%;border-collapse:collapse;font-size:13px;}
+  thead th{font-family:var(--mono);font-size:9.5px;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);text-align:left;padding:9px 11px;border-bottom:1px solid #e1e6ea;font-weight:600;}
+  thead th.r,tbody td.r{text-align:right;}
+  tbody td{padding:8px 11px;border-bottom:1px solid #eef1f4;}
+  tbody td .code{font-family:var(--mono);font-size:11px;color:var(--muted);}
+  tbody td.qty{font-family:var(--mono);font-weight:600;}
+  .pin{width:74px;font-family:var(--mono);font-size:12px;text-align:right;padding:5px 7px;border:1px solid #d2d8de;border-radius:5px;}
+  .pin:focus-visible{outline:2px solid var(--gold);outline-offset:1px;border-color:var(--gold);}
+  tfoot td{padding:12px 11px;font-weight:700;border-top:2px solid var(--ink);}
+  tfoot td.tot{font-family:var(--mono);font-size:16px;text-align:right;}
+  .bom-empty{padding:22px;text-align:center;color:var(--muted-l);font-size:13px;}
+  .note{font-size:11.5px;color:var(--muted);padding:10px 15px;border-top:1px solid #eef1f4;line-height:1.5;}
+  .note b{color:var(--gold-d);}
+  .modal{position:fixed;inset:0;background:rgba(18,22,28,.62);display:none;align-items:flex-start;justify-content:center;padding:24px 14px;overflow-y:auto;z-index:50;}
+  .modal.open{display:flex;}
+  .sheet{background:#fff;border-radius:12px;max-width:760px;width:100%;box-shadow:0 18px 50px rgba(0,0,0,.35);overflow:hidden;}
+  .sh-h{background:var(--steel-900);color:#fff;padding:16px 20px;display:flex;align-items:center;justify-content:space-between;}
+  .sh-h h2{margin:0;font-size:16px;text-transform:uppercase;letter-spacing:.04em;}
+  .sh-h .x{background:none;border:none;color:#cbd2d9;font-size:22px;cursor:pointer;line-height:1;}
+  .sh-b{padding:18px 20px;display:grid;grid-template-columns:1fr 1fr;gap:20px;}
+  @media (max-width:640px){.sh-b{grid-template-columns:1fr;}}
+  .spec{font-family:var(--mono);font-size:12px;}
+  .spec .row{display:flex;justify-content:space-between;padding:5px 0;border-bottom:1px solid #eef1f4;}
+  .spec .row .k{color:var(--muted);} .spec .row .v{font-weight:600;}
+  .spec h4,.form h4{font-family:var(--sans);font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--gold-d);margin:0 0 6px;}
+  .form label{display:block;font-size:11px;font-family:var(--mono);text-transform:uppercase;letter-spacing:.06em;color:var(--muted);margin:9px 0 3px;}
+  .form input{width:100%;font-family:var(--sans);font-size:13px;padding:8px 10px;border:1px solid #c8cfd6;border-radius:6px;}
+  .form input:focus-visible{outline:2px solid var(--gold);outline-offset:1px;border-color:var(--gold);}
+  .wa-wrap{margin-top:14px;} .wa-wrap a{display:flex;align-items:center;justify-content:center;gap:8px;text-decoration:none;}
+  .wa-hint{font-size:11px;color:var(--muted);margin-top:7px;text-align:center;}
+  footer{margin-top:24px;font-family:var(--mono);font-size:11px;color:var(--muted-l);text-align:center;}
+  @media (prefers-reduced-motion:reduce){*{transition:none!important;}}
+</style>
+</head>
+<body>
+<header><div class="hi">
+  <div class="brand"><span class="sp">SoluPark</span><span class="gl">Golden Line · Estación en L</span></div>
+  <h1>Armá tu <span class="t">estación en esquina</span></h1>
+  <p class="sub">Dos paredes en L unidas por el módulo esquinero. Agregá módulos a cada lado, sumá mesada, panel y luz, y el sistema te muestra la planta, el alzado y la cotización por WhatsApp.</p>
+  <div class="readout" id="readout"></div>
+</div></header>
+
+<div class="wrap">
+  <div class="grid">
+    <aside class="panel" aria-label="Módulos">
+      <div class="ph"><h2>Módulos</h2></div>
+      <div class="cat" style="padding-bottom:8px;border-bottom:1px solid #eef1f4;">
+        <h3>Agregando al</h3>
+        <div class="seg" id="target" role="tablist" style="width:100%;">
+          <button data-s="A" class="on" style="flex:1;">Lado A</button>
+          <button data-s="B" style="flex:1;">Lado B</button>
+        </div>
+      </div>
+      <div id="palette"></div>
+      <div class="cat"><h3>Esquinero (el codo)</h3><div id="corner"></div></div>
+      <div class="cat"><h3>Capas (auto, ambos lados)</h3><div id="overlays"></div></div>
+      <div style="border-top:1px solid #eef1f4;padding:6px 0 10px;">
+        <div class="field"><label>Pared A</label><input type="number" id="availA" value="2800" min="900" step="50"> mm</div>
+        <div class="field"><label>Pared B</label><input type="number" id="availB" value="2200" min="900" step="50"> mm</div>
+      </div>
+    </aside>
+
+    <section class="panel">
+      <div class="ph"><h2>Planta (vista superior)</h2>
+        <div style="display:flex;gap:8px;"><button class="btn ghost" id="clear">Vaciar</button><button class="btn cta" id="quote">Pedir cotización →</button></div>
+      </div>
+      <div class="stage" id="stagePlan"><svg id="svgPlan" width="100%" height="320" role="img" aria-label="Planta de la estación en L"></svg></div>
+      <div class="ph" style="border-top:1px solid #e4e8ec;">
+        <h2>Alzado</h2>
+        <div class="seg" id="elevTab"><button data-s="A" class="on">Lado A</button><button data-s="B">Lado B</button></div>
+      </div>
+      <div class="stage" id="stageElev"><svg id="svgElev" width="100%" height="230" role="img" aria-label="Alzado de la pared"></svg></div>
+      <div class="run-wrap"><h4>Lado A</h4><div class="run" id="runA"></div></div>
+      <div class="run-wrap" style="border-top:none;padding-top:0;"><h4>Lado B</h4><div class="run" id="runB"></div></div>
+    </section>
+  </div>
+
+  <div class="panel" style="margin-top:18px;">
+    <div class="ph"><h2>Lista de piezas y costo</h2></div>
+    <table>
+      <thead><tr><th>Módulo</th><th>Descripción</th><th class="r">Cant.</th><th class="r">N.W. (kg)</th><th class="r">Precio venta US$</th><th class="r">Subtotal</th></tr></thead>
+      <tbody id="bom"></tbody>
+      <tfoot id="foot"></tfoot>
+    </table>
+    <p class="note"><b>Precios de venta editables.</b> Cargá el precio al cliente por módulo (a definir) y el total se recalcula. El esquinero (GLG7016 + tapa GLG7015 + mesada de esquina GLG7020) se cuenta una sola vez aunque ocupe largo en las dos paredes. Datos: serie Golden Line GLG7000.</p>
+  </div>
+  <footer>Configurador v2 · estación en L · datos Golden Line GLG7000 · vista 2.5D (planta + alzado)</footer>
+</div>
+
+<div class="modal" id="modal" role="dialog" aria-modal="true" aria-labelledby="mt">
+  <div class="sheet">
+    <div class="sh-h"><h2 id="mt">Vista final · Cotización</h2><button class="x" id="closeM" aria-label="Cerrar">×</button></div>
+    <div class="sh-b">
+      <div class="spec" id="finalSpec"></div>
+      <div class="form">
+        <h4>Solicitar cotización</h4>
+        <p style="font-size:11.5px;color:var(--muted);margin:2px 0 4px;">Completá tus datos y enviá el detalle por WhatsApp.</p>
+        <label>Nombre y apellido</label><input id="f_nombre" autocomplete="name">
+        <label>Documento</label><input id="f_doc">
+        <label>Ubicación</label><input id="f_ubic">
+        <label>Correo</label><input id="f_mail" type="email" autocomplete="email">
+        <label>Teléfono</label><input id="f_tel" inputmode="tel" autocomplete="tel">
+        <div class="wa-wrap"><a class="btn wa" id="waBtn" href="#" target="_blank" rel="noopener">
+          <svg width="17" height="17" viewBox="0 0 24 24" fill="currentColor"><path d="M.057 24l1.687-6.163a11.867 11.867 0 01-1.587-5.945C.16 5.335 5.495 0 12.05 0a11.82 11.82 0 018.413 3.488 11.82 11.82 0 013.48 8.414c-.003 6.557-5.338 11.892-11.893 11.892a11.9 11.9 0 01-5.688-1.448L.057 24zm6.597-3.807c1.676.995 3.276 1.591 5.392 1.592 5.448 0 9.886-4.434 9.889-9.885.002-5.462-4.415-9.89-9.881-9.892-5.452 0-9.887 4.434-9.889 9.884a9.86 9.86 0 001.519 5.26l-.999 3.648 3.97-1.607zm11.387-5.464c-.074-.124-.272-.198-.57-.347-.297-.149-1.758-.868-2.031-.967-.272-.099-.47-.149-.669.149-.198.297-.768.967-.941 1.165-.173.198-.347.223-.644.074-.297-.149-1.255-.462-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.297-.347.446-.521.151-.172.2-.296.3-.495.099-.198.05-.372-.025-.521-.075-.148-.669-1.611-.916-2.206-.242-.579-.487-.501-.669-.51l-.57-.01c-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.626.712.226 1.36.194 1.872.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413z"/></svg>
+          <span>Enviar por WhatsApp</span></a></div>
+        <p class="wa-hint">Se abre WhatsApp con el detalle ya escrito. Lo revisás y tocás enviar.</p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+/* ===== Golden Line GLG7000 (catálogo 2026) ===== */
+const M={
+ 'GLG7013':{n:'Torre alta',cl:'col',sub:'tower',W:915,D:460,H:2000,eW:980,eD:535,eH:2020,nw:77.5,gw:85.5},
+ 'GLG7002':{n:'Torre angosta',cl:'col',sub:'tower',W:600,D:460,H:2000,eW:665,eD:540,eH:2020,nw:52,gw:58},
+ 'GLG7019':{n:'Base ancha',cl:'col',sub:'door',W:915,D:460,H:870,eW:980,eD:525,eH:945,nw:36,gw:39},
+ 'GLG7003':{n:'Base con puertas',cl:'col',sub:'door',W:680,D:460,H:910,eW:745,eD:525,eH:945,nw:27.5,gw:31},
+ 'GLG7005':{n:'Base 6 cajones',cl:'col',sub:'drawer',W:680,D:460,H:910,eW:745,eD:525,eH:945,nw:48.5,gw:52},
+ 'GLG7011':{n:'Base cajones',cl:'col',sub:'drawer',W:680,D:460,H:910,eW:745,eD:525,eH:945,nw:35.4,gw:39},
+ 'GLG7012':{n:'Cajonera',cl:'col',sub:'drawer',W:658,D:460,H:895,eW:725,eD:525,eH:815,nw:48,gw:51.5},
+ // corner
+ 'GLG7016':{n:'Esquinero base',cl:'corner',W:810,D:810,H:870,eW:875,eD:875,eH:945,nw:37,gw:39},
+ 'GLG7015':{n:'Esquinero tapa',cl:'corner',W:810,D:810,H:40,eW:835,eD:835,eH:50,nw:10,gw:11.5},
+ 'GLG7014':{n:'Esquinero superior',cl:'corner',W:810,D:810,H:355,eW:875,eD:875,eH:430,nw:14.55,gw:18.35},
+ 'GLG7020':{n:'Mesada de esquina',cl:'corner',W:1052,D:732,H:60,eW:1080,eD:732,eH:75,nw:15.5,gw:16.5},
+ // overlays
+ 'GLG7006':{n:'Mesada',cl:'ov',key:'top',W:1052,D:605,H:28,eW:1090,eD:635,eH:55,nw:6.2,gw:8.1},
+ 'GLG7009':{n:'Panel perforado',cl:'ov',key:'peg',W:1362,D:467,H:36,eW:1410,eD:495,eH:60,nw:8.9,gw:10},
+ 'GLG7008':{n:'Barra LED',cl:'ov',key:'led',W:1420,D:50.5,H:30,eW:1460,eD:90,eH:50,nw:3.4,gw:3.8},
+ 'GLG7001':{n:'Módulo superior',cl:'ov',key:'upper',W:680,D:281,H:350,eW:745,eD:350,eH:430,nw:10.5,gw:12.5},
+};
+const COLS=['GLG7013','GLG7002','GLG7019','GLG7003','GLG7005','GLG7011','GLG7012'];
+const OVR=[['top','Mesada','GLG7006'],['peg','Panel perforado','GLG7009'],['led','Barra LED','GLG7008'],['upper','Módulos superiores','GLG7001']];
+const CORNER='GLG7016',CORNTOP='GLG7015',CORNUP='GLG7014',CORNTOPW='GLG7020';
+const CONT20=28,CONT40=68,WA='59892877444';
+
+const st={target:'A',elev:'A',availA:2800,availB:2200,A:[],B:[],corner:true,cornerUp:false,
+  ovr:{top:true,peg:true,led:false,upper:false},price:{}};
+Object.keys(M).forEach(k=>st.price[k]=0);
+const $=s=>document.querySelector(s);
+const money=n=>'US$ '+Math.round(n).toLocaleString('es-UY');
+const vol=c=>M[c].eW*M[c].eD*M[c].eH/1e9;
+
+function glyph(c){const m=M[c];
+ if(m.sub==='tower')return `<svg viewBox="0 0 30 36"><rect x="7" y="2" width="16" height="32" rx="1" fill="#cdb27a" stroke="#9a7d3e"/><line x1="15" y1="2" x2="15" y2="34" stroke="#9a7d3e" stroke-width=".6"/></svg>`;
+ let b=m.sub==='drawer'?[0,1,2,3].map(i=>`<rect x="6" y="${15+i*4.6}" width="18" height="3.4" fill="#cdd3da" stroke="#9aa2ad" stroke-width=".5"/>`).join('')
+   :`<rect x="6" y="15" width="18" height="19" fill="#cdd3da" stroke="#9aa2ad"/><line x1="15" y1="15" x2="15" y2="34" stroke="#9aa2ad"/>`;
+ return `<svg viewBox="0 0 30 36"><rect x="3" y="2" width="24" height="11" fill="#dfe3e8" stroke="#9aa2ad"/><rect x="4" y="13" width="22" height="2.5" fill="#8b94a0"/>${b}</svg>`;}
+
+function buildPalette(){const p=$('#palette');p.innerHTML='';
+ const box=document.createElement('div');box.className='cat';box.innerHTML='<h3>Bases y torres</h3>';
+ const list=document.createElement('div');list.className='mods';
+ COLS.forEach(c=>{const m=M[c];const b=document.createElement('button');b.className='mod';b.type='button';
+  b.setAttribute('aria-label','Agregar '+m.n);
+  b.innerHTML=`<span class="g">${glyph(c)}</span><span><span class="code">${c}</span><span class="nm">${m.n}</span><span class="dim">${m.W}×${m.D}×${m.H}</span></span><span class="add">+</span>`;
+  b.onclick=()=>{st[st.target].push(c);render();};list.appendChild(b);});
+ box.appendChild(list);p.appendChild(box);
+
+ const cor=$('#corner');cor.innerHTML='';
+ [['corner','Incluir esquinero','GLG7016 + tapa'],['cornerUp','Mueble alto en esquina','GLG7014']].forEach(([k,label,sub])=>{
+  const d=document.createElement('div');d.className='ov';
+  d.innerHTML=`<label>${label}<small>${sub}</small></label><span class="sw"><input type="checkbox" ${st[k]?'checked':''} aria-label="${label}"><span></span></span>`;
+  d.querySelector('input').onchange=e=>{st[k]=e.target.checked;render();};cor.appendChild(d);});
+
+ const o=$('#overlays');o.innerHTML='';
+ OVR.forEach(([key,label,code])=>{const d=document.createElement('div');d.className='ov';
+  d.innerHTML=`<label>${label}<small>${code} · auto</small></label><span class="sw"><input type="checkbox" ${st.ovr[key]?'checked':''} aria-label="${label}"><span></span></span>`;
+  d.querySelector('input').onchange=e=>{st.ovr[key]=e.target.checked;render();};o.appendChild(d);});}
+
+/* ===== derived ===== */
+function sideBaseW(side){return st[side].filter(c=>M[c].sub!=='tower').reduce((s,c)=>s+M[c].W,0);}
+function calc(){
+ const counts={};
+ const addC=(c,q=1)=>counts[c]=(counts[c]||0)+q;
+ st.A.forEach(c=>addC(c)); st.B.forEach(c=>addC(c));
+ // corner pieces (once)
+ if(st.corner){addC(CORNER);addC(CORNTOP);if(st.ovr.top)addC(CORNTOPW);if(st.cornerUp)addC(CORNUP);}
+ // overlays per side, spanning that side's base run (+ corner contributes a base too)
+ const cornBase=st.corner?M[CORNER].W:0;
+ ['A','B'].forEach(side=>{
+   const span=sideBaseW(side)+cornBase;
+   OVR.forEach(([key,,code])=>{ if(st.ovr[key]&&span>0) addC(code,Math.ceil(span/M[code].W)); });
+ });
+ let nw=0,gw=0,cbm=0,price=0;
+ Object.entries(counts).forEach(([c,q])=>{nw+=M[c].nw*q;gw+=M[c].gw*q;cbm+=vol(c)*q;price+=(st.price[c]||0)*q;});
+ const cornW=st.corner?M[CORNER].W:0;
+ const widthA=cornW+st.A.reduce((s,c)=>s+M[c].W,0);
+ const widthB=cornW+st.B.reduce((s,c)=>s+M[c].W,0);
+ const nMod=Object.values(counts).reduce((a,b)=>a+b,0);
+ return {counts,nw,gw,cbm,price,widthA,widthB,nMod,
+   fitA:widthA<=st.availA,fitB:widthB<=st.availB,
+   any:st.A.length||st.B.length||st.corner};
+}
+
+function readout(){const d=calc();const pct=Math.round(d.cbm/CONT20*100);
+ const wa=`<span class="${d.fitA?'ok':'over'}">${d.widthA.toLocaleString('es-UY')}</span>`;
+ const wb=`<span class="${d.fitB?'ok':'over'}">${d.widthB.toLocaleString('es-UY')}</span>`;
+ $('#readout').innerHTML=`
+  <div class="ro"><div class="k">Ancho A</div><div class="v ${d.fitA?'ok':'over'}">${d.widthA.toLocaleString('es-UY')} <small>mm</small></div></div>
+  <div class="ro"><div class="k">Ancho B</div><div class="v ${d.fitB?'ok':'over'}">${d.widthB.toLocaleString('es-UY')} <small>mm</small></div></div>
+  <div class="ro"><div class="k">Peso neto</div><div class="v">${Math.round(d.nw)} <small>kg</small></div></div>
+  <div class="ro"><div class="k">Volumen</div><div class="v">${d.cbm.toFixed(2)} <small>CBM</small></div></div>
+  <div class="ro"><div class="k">Contenedor 20'</div><div class="v">${pct}<small>%</small></div></div>
+  <div class="ro"><div class="k">Precio total</div><div class="v">${money(d.price)}</div></div>`;}
+
+/* ===== PLAN (top-down L) ===== */
+function drawPlan(){const svg=$('#svgPlan');const d=calc();
+ const cornW=st.corner?810:0;
+ const lenA=cornW+st.A.reduce((s,c)=>s+M[c].W,0);
+ const lenB=cornW+st.B.reduce((s,c)=>s+M[c].W,0);
+ const extentX=Math.max(lenA,st.availA,1200);
+ const extentY=Math.max(lenB,st.availB,1200);
+ const pad=34;const cw=Math.max((svg.clientWidth||820),360);
+ const sc=Math.min((cw-pad*2)/(extentX+260),(440-pad*2)/(extentY+260),0.085);
+ const ox=pad+20,oy=pad+18; // elbow origin (inner corner)
+ const H=(extentY)*sc+pad*2+30;svg.setAttribute('height',Math.max(300,H));
+ let g='';const stk='#7a6a45',base='#c9b178',cornc='#e0a93e';
+ const wallTh=6;
+ // walls (thick lines along top for A and left for B)
+ g+=`<rect x="${ox-wallTh}" y="${oy-wallTh}" width="${lenA*sc+wallTh}" height="${wallTh}" fill="#3a4049"/>`;
+ g+=`<rect x="${ox-wallTh}" y="${oy-wallTh}" width="${wallTh}" height="${lenB*sc+wallTh}" fill="#3a4049"/>`;
+ // corner module footprint
+ if(st.corner){g+=`<rect x="${ox}" y="${oy}" width="${810*sc}" height="${810*sc}" fill="${cornc}" stroke="${stk}"/>
+   <text x="${ox+810*sc/2}" y="${oy+810*sc/2+3}" font-family="monospace" font-size="8" fill="#5a4410" text-anchor="middle">7016</text>`;}
+ // wall A modules (extend right from corner, depth downward)
+ let xa=ox+cornW*sc;
+ st.A.forEach((c,i)=>{const m=M[c];const w=m.W*sc,dep=m.D*sc;
+   g+=`<g opacity="0"><rect x="${xa}" y="${oy}" width="${w}" height="${dep}" fill="${base}" stroke="${stk}"/>`;
+   if(m.sub==='drawer')for(let k=1;k<3;k++)g+=`<line x1="${xa}" y1="${oy+dep*k/3}" x2="${xa+w}" y2="${oy+dep*k/3}" stroke="#a98c46" stroke-width=".4"/>`;
+   g+=`<text x="${xa+w/2}" y="${oy-3}" font-family="monospace" font-size="7.5" fill="#aeb6c0" text-anchor="middle">${m.W}</text><animate attributeName="opacity" to="1" dur=".25s" begin="${i*35}ms" fill="freeze"/></g>`;
+   xa+=w;});
+ // wall B modules (extend down from corner, depth rightward)
+ let yb=oy+cornW*sc;
+ st.B.forEach((c,i)=>{const m=M[c];const h=m.W*sc,dep=m.D*sc;
+   g+=`<g opacity="0"><rect x="${ox}" y="${yb}" width="${dep}" height="${h}" fill="${base}" stroke="${stk}"/>`;
+   if(m.sub==='drawer')for(let k=1;k<3;k++)g+=`<line x1="${ox+dep*k/3}" y1="${yb}" x2="${ox+dep*k/3}" y2="${yb+h}" stroke="#a98c46" stroke-width=".4"/>`;
+   g+=`<text x="${ox-4}" y="${yb+h/2+3}" font-family="monospace" font-size="7.5" fill="#aeb6c0" text-anchor="end">${m.W}</text><animate attributeName="opacity" to="1" dur=".25s" begin="${i*35}ms" fill="freeze"/></g>`;
+   yb+=h;});
+ // worktop overhang (front edge) if mesada
+ if(st.ovr.top){const oh=(605)*sc;
+   if(lenA>cornW)g+=`<rect x="${ox+cornW*sc}" y="${oy}" width="${(lenA-cornW)*sc}" height="${oh}" fill="#6e5a32" opacity=".22"/>`;
+   if(lenB>cornW)g+=`<rect x="${ox}" y="${oy+cornW*sc}" width="${oh}" height="${(lenB-cornW)*sc}" fill="#6e5a32" opacity=".22"/>`;}
+ // available wall guides
+ const gA=ox+st.availA*sc,gB=oy+st.availB*sc;
+ g+=`<line x1="${gA}" y1="${oy-10}" x2="${gA}" y2="${oy+40}" stroke="#d99327" stroke-dasharray="4 3" opacity=".8"/><text x="${gA}" y="${oy-13}" font-family="monospace" font-size="8" fill="#e3b86a" text-anchor="middle">pared A ${st.availA}</text>`;
+ g+=`<line x1="${ox-10}" y1="${gB}" x2="${ox+40}" y2="${gB}" stroke="#d99327" stroke-dasharray="4 3" opacity=".8"/><text x="${ox-12}" y="${gB+3}" font-family="monospace" font-size="8" fill="#e3b86a" text-anchor="end">pared B</text>`;
+ // labels + dim
+ g+=`<text x="${ox+lenA*sc/2}" y="${oy+ (st.ovr.top?605*sc:0) +Math.max(460*sc,18)+16}" font-family="monospace" font-size="9" fill="#d99327" text-anchor="middle">LADO A · ${lenA} mm →</text>`;
+ g+=`<text x="${ox+ (st.ovr.top?605*sc:0)+Math.max(460*sc,18)+8}" y="${oy+lenB*sc/2}" font-family="monospace" font-size="9" fill="#d99327" transform="rotate(90 ${ox+(st.ovr.top?605*sc:0)+Math.max(460*sc,18)+8} ${oy+lenB*sc/2})" text-anchor="middle">LADO B · ${lenB} mm ↓</text>`;
+ svg.innerHTML=g||'';
+ if(!d.any)svg.innerHTML=`<text x="50%" y="50%" font-family="monospace" font-size="12" fill="#868f9b" text-anchor="middle">Activá el esquinero y agregá módulos a cada lado</text>`;}
+
+/* ===== ELEVATION (one side) ===== */
+function drawElev(){const svg=$('#svgElev');const side=st.elev;const arr=st[side];
+ const cornW=st.corner?810:0;
+ const total=cornW+arr.reduce((s,c)=>s+M[c].W,0);
+ const pad={l:16,r:16,t:10,b:34};const cw=Math.max((svg.clientWidth||820),360);
+ const usable=cw-pad.l-pad.r;const drawnW=Math.max(total,1);
+ const sc=Math.min(usable/drawnW,0.1);const ground=pad.t+2000*sc;svg.setAttribute('height',ground+pad.b);
+ const stk='#7a6a45';let g='';let x=pad.l;
+ const baseTop=ground-910*sc,wtTop=ground-940*sc,pegTop=ground-1900*sc,pegBot=ground-1120*sc,ledY=ground-1955*sc,upTop=ground-1450*sc,upBot=ground-1120*sc;
+ const ov=(xx,w)=>{let p='';if(st.ovr.peg)p+=`<rect x="${xx}" y="${pegTop}" width="${w}" height="${pegBot-pegTop}" fill="url(#pg2)" stroke="${stk}" stroke-width=".5"/>`;
+   if(st.ovr.upper)p+=`<rect x="${xx+1}" y="${upTop}" width="${w-2}" height="${upBot-upTop}" fill="#cdb480" stroke="${stk}" stroke-width=".6"/>`;
+   if(st.ovr.led)p+=`<rect x="${xx}" y="${ledY}" width="${w}" height="${Math.max(2,6*sc)}" fill="#ffe08a" stroke="#caa53a" stroke-width=".4"/>`;
+   if(st.ovr.top)p+=`<rect x="${xx}" y="${wtTop}" width="${w}" height="${Math.max(2,30*sc)}" fill="#6e5a32"/>`;return p;};
+ // corner base at elbow (left)
+ if(st.corner){const w=810*sc;const cTop=ground-870*sc;
+   g+=ov(x,w);
+   g+=`<rect x="${x}" y="${cTop}" width="${w}" height="${ground-cTop}" fill="${'#e0a93e'}" stroke="${stk}"/><text x="${x+w/2}" y="${ground-870*sc/2}" font-family="monospace" font-size="8" fill="#5a4410" text-anchor="middle">esq.</text>`;
+   x+=w;}
+ arr.forEach((c,i)=>{const m=M[c];const w=m.W*sc;const isT=m.sub==='tower';
+   let p='';
+   if(isT)p=`<rect x="${x}" y="${ground-2000*sc}" width="${w}" height="${2000*sc}" fill="#c9b178" stroke="${stk}"/><line x1="${x+w/2}" y1="${ground-2000*sc}" x2="${x+w/2}" y2="${ground}" stroke="${stk}" stroke-width=".6"/>`;
+   else{p+=ov(x,w);
+     p+=`<rect x="${x}" y="${baseTop}" width="${w}" height="${ground-baseTop}" fill="#c9b178" stroke="${stk}"/>`;
+     if(m.sub==='drawer'){const n=4,ch=(ground-baseTop)/n;for(let k=0;k<n;k++){const dy=baseTop+k*ch;p+=`<rect x="${x+2}" y="${dy+1.5}" width="${w-4}" height="${ch-3}" fill="#d4be86" stroke="#a98c46" stroke-width=".5"/>`;}}
+     else p+=`<line x1="${x+w/2}" y1="${baseTop}" x2="${x+w/2}" y2="${ground}" stroke="#a98c46"/>`;}
+   g+=`<g opacity="0">${p}<text x="${x+w/2}" y="${ground+13}" font-family="monospace" font-size="8.5" fill="#aeb6c0" text-anchor="middle">${m.W}</text><animate attributeName="opacity" to="1" dur=".25s" begin="${i*35}ms" fill="freeze"/></g>`;
+   x+=w;});
+ let dim='';if(total>0){const dy=ground+24,tp=total*sc,x0=pad.l;dim=`<line x1="${x0}" y1="${dy}" x2="${x0+tp}" y2="${dy}" stroke="#d99327"/><rect x="${x0+tp/2-34}" y="${dy-8}" width="68" height="15" fill="#1d2026"/><text x="${x0+tp/2}" y="${dy+3}" font-family="monospace" font-size="10" fill="#fff" text-anchor="middle">Lado ${side}: ${total} mm</text>`;}
+ const defs=`<defs><pattern id="pg2" width="8" height="8" patternUnits="userSpaceOnUse"><rect width="8" height="8" fill="#d9cfa8"/><circle cx="4" cy="4" r="1" fill="#b9a874"/></pattern></defs>`;
+ svg.innerHTML=defs+`<line x1="${pad.l}" y1="${ground}" x2="${cw-pad.r}" y2="${ground}" stroke="#454c56" stroke-width="1.5"/>${g}${dim}`;
+ if(!arr.length&&!st.corner)svg.innerHTML=`<text x="50%" y="50%" font-family="monospace" font-size="12" fill="#868f9b" text-anchor="middle">Lado ${side} vacío</text>`;}
+
+function buildRun(side){const r=$('#run'+side);r.innerHTML='';
+ if(!st[side].length){r.innerHTML='<span class="empty-hint">Vacío — elegí "Lado '+side+'" arriba y agregá módulos.</span>';return;}
+ st[side].forEach((c,i)=>{const m=M[c];const ch=document.createElement('span');ch.className='chip';
+  ch.innerHTML=`<span class="c">${c}</span><span>${m.n}</span>`;
+  const L=document.createElement('button');L.innerHTML='‹';L.onclick=()=>{if(i>0){[st[side][i-1],st[side][i]]=[st[side][i],st[side][i-1]];render();}};
+  const R=document.createElement('button');R.innerHTML='›';R.onclick=()=>{if(i<st[side].length-1){[st[side][i+1],st[side][i]]=[st[side][i],st[side][i+1]];render();}};
+  const X=document.createElement('button');X.innerHTML='×';X.onclick=()=>{st[side].splice(i,1);render();};
+  ch.append(L,R,X);r.appendChild(ch);});}
+
+/* ===== BOM ===== */
+const order=()=> [CORNER,CORNTOP,CORNUP,CORNTOPW,...COLS,...OVR.map(o=>o[2])];
+function buildBOM(){const b=$('#bom'),f=$('#foot');const d=calc();const codes=Object.keys(d.counts);
+ if(!codes.length){b.innerHTML='<tr><td colspan="6" class="bom-empty">Activá el esquinero y agregá módulos.</td></tr>';f.innerHTML='';return;}
+ const ord=order();codes.sort((a,b2)=>ord.indexOf(a)-ord.indexOf(b2));
+ b.innerHTML=codes.map(c=>{const m=M[c],q=d.counts[c],u=st.price[c]||0;
+   const tag=m.cl==='ov'?' <span style="font-size:9px;color:#b3751a;font-family:var(--mono)">capa</span>':(m.cl==='corner'?' <span style="font-size:9px;color:#b3751a;font-family:var(--mono)">esquina</span>':'');
+   return `<tr><td><span class="code">${c}</span></td><td>${m.n}${tag}</td><td class="r qty">×${q}</td><td class="r"><span class="code">${(m.nw*q).toFixed(1)}</span></td><td class="r"><input class="pin" type="number" min="0" step="1" value="${u}" data-c="${c}" aria-label="Precio ${c}"></td><td class="r"><span class="code">${money(u*q)}</span></td></tr>`;}).join('');
+ f.innerHTML=`<tr><td colspan="3">Totales</td><td class="r"><span class="code" style="font-weight:700">${d.nw.toFixed(0)} kg</span></td><td></td><td class="tot">${money(d.price)}</td></tr>`;
+ b.querySelectorAll('.pin').forEach(i=>i.addEventListener('input',e=>{const v=parseFloat(e.target.value);st.price[e.target.dataset.c]=isNaN(v)?0:v;
+   const d2=calc();readout();f.querySelector('.tot').textContent=money(d2.price);
+   e.target.closest('tr').querySelector('td:last-child .code').textContent=money((st.price[e.target.dataset.c]||0)*d2.counts[e.target.dataset.c]);}));}
+
+function render(){readout();drawPlan();drawElev();buildRun('A');buildRun('B');buildBOM();}
+
+/* ===== Vista final + WhatsApp ===== */
+function bomLines(){const d=calc();const ord=order();
+ return Object.keys(d.counts).sort((a,b)=>ord.indexOf(a)-ord.indexOf(b)).map(c=>`• ${c} ${M[c].n} ×${d.counts[c]}`).join('\n');}
+function openModal(){const d=calc();const p20=Math.round(d.cbm/CONT20*100),p40=Math.round(d.cbm/CONT40*100);
+ $('#finalSpec').innerHTML=`<h4>Ficha de la estación en L</h4>
+   <div class="row"><span class="k">Lado A</span><span class="v">${d.widthA} mm ${d.fitA?'':'(excede)'}</span></div>
+   <div class="row"><span class="k">Lado B</span><span class="v">${d.widthB} mm ${d.fitB?'':'(excede)'}</span></div>
+   <div class="row"><span class="k">Esquinero</span><span class="v">${st.corner?'Sí':'No'}</span></div>
+   <div class="row"><span class="k">N° de módulos</span><span class="v">${d.nMod}</span></div>
+   <div class="row"><span class="k">Peso neto / bruto</span><span class="v">${d.nw.toFixed(0)} / ${d.gw.toFixed(0)} kg</span></div>
+   <div class="row"><span class="k">Volumen</span><span class="v">${d.cbm.toFixed(2)} CBM</span></div>
+   <div class="row"><span class="k">Contenedor 20' / 40'</span><span class="v">${p20}% / ${p40}%</span></div>
+   <div class="row"><span class="k">Precio total (orient.)</span><span class="v">${money(d.price)}</span></div>
+   <h4 style="margin-top:12px">Piezas</h4><div style="white-space:pre-line;color:#444;font-size:11px">${bomLines()}</div>`;
+ updateWA();$('#modal').classList.add('open');}
+function updateWA(){const d=calc();
+ let t=`Hola SoluPark! Quiero cotizar esta estación en L (Golden Line):\n\nLado A: ${d.widthA} mm\nLado B: ${d.widthB} mm\nEsquinero: ${st.corner?'sí':'no'}\nPeso: ${d.nw.toFixed(0)} kg neto / ${d.gw.toFixed(0)} kg bruto\nVolumen: ${d.cbm.toFixed(2)} CBM\n\nPiezas:\n${bomLines()}\n\n`;
+ const dat=[['Nombre',$('#f_nombre').value.trim()],['Documento',$('#f_doc').value.trim()],['Ubicación',$('#f_ubic').value.trim()],['Correo',$('#f_mail').value.trim()],['Teléfono',$('#f_tel').value.trim()]].filter(x=>x[1]);
+ if(dat.length)t+='Mis datos:\n'+dat.map(x=>`${x[0]}: ${x[1]}`).join('\n');
+ $('#waBtn').href=`https://wa.me/${WA}?text=${encodeURIComponent(t)}`;}
+['f_nombre','f_doc','f_ubic','f_mail','f_tel'].forEach(id=>document.addEventListener('input',e=>{if(e.target.id===id)updateWA();}));
+
+/* tabs */
+$('#target').querySelectorAll('button').forEach(b=>b.onclick=()=>{st.target=b.dataset.s;$('#target').querySelectorAll('button').forEach(x=>x.classList.toggle('on',x===b));});
+$('#elevTab').querySelectorAll('button').forEach(b=>b.onclick=()=>{st.elev=b.dataset.s;$('#elevTab').querySelectorAll('button').forEach(x=>x.classList.toggle('on',x===b));drawElev();});
+$('#availA').addEventListener('input',e=>{st.availA=parseInt(e.target.value)||0;readout();drawPlan();});
+$('#availB').addEventListener('input',e=>{st.availB=parseInt(e.target.value)||0;readout();drawPlan();});
+$('#clear').onclick=()=>{st.A=[];st.B=[];render();};
+$('#quote').onclick=()=>{const d=calc();if(!d.any){alert('Agregá módulos o activá el esquinero.');return;}openModal();};
+$('#closeM').onclick=()=>$('#modal').classList.remove('open');
+$('#modal').addEventListener('click',e=>{if(e.target.id==='modal')$('#modal').classList.remove('open');});
+window.addEventListener('resize',()=>{drawPlan();drawElev();});
+buildPalette();render();
+</script>
+</body>
+</html>

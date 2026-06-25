@@ -1,0 +1,349 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Armá tu estación · SoluPark — Golden Line</title>
+<style>
+  :root{
+    --ink:#14161b; --steel-900:#15171c; --steel-800:#1d2026; --steel-700:#262a31;
+    --line:#363c45; --line-soft:#454c56;
+    --paper:#e8eaed; --card:#fff;
+    --silver:#aeb6c0; --silver-d:#868f9b; --silver-l:#cdd3da;
+    --gold:#d99327; --gold-d:#b3751a; --gold-soft:#fbeed6;
+    --ok:#2f9466; --ok-soft:#dcefe6; --warn:#ec5a23; --warn-soft:#fbe3d8;
+    --muted:#6f7884; --muted-l:#9aa2ad;
+    --sans:-apple-system,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+    --mono:ui-monospace,"SF Mono","Menlo","Consolas","Liberation Mono",monospace;
+  }
+  *{box-sizing:border-box;}
+  html,body{margin:0;}
+  body{font-family:var(--sans);color:var(--ink);background:var(--paper);
+    background-image:linear-gradient(rgba(120,130,145,.06) 1px,transparent 1px),linear-gradient(90deg,rgba(120,130,145,.06) 1px,transparent 1px);
+    background-size:22px 22px;-webkit-font-smoothing:antialiased;line-height:1.45;}
+  .wrap{max-width:1200px;margin:0 auto;padding:0 16px 70px;}
+  header{background:var(--steel-900);color:#eef1f4;margin:0 -16px;padding:20px 16px 0;border-bottom:3px solid var(--gold);}
+  .hi{max-width:1200px;margin:0 auto;}
+  .brand{display:flex;align-items:baseline;gap:10px;}
+  .brand .sp{font-weight:800;letter-spacing:.02em;font-size:18px;}
+  .brand .gl{font-family:var(--mono);font-size:11px;letter-spacing:.32em;color:var(--gold);text-transform:uppercase;}
+  h1{font-size:27px;line-height:1.05;margin:8px 0 0;font-weight:800;text-transform:uppercase;letter-spacing:-.01em;}
+  h1 .t{font-weight:300;color:var(--silver);}
+  .sub{color:var(--muted-l);font-size:13.5px;margin:7px 0 0;max-width:64ch;}
+  .readout{display:flex;flex-wrap:wrap;gap:1px;background:var(--line);border:1px solid var(--line);margin:18px 0 -22px;border-radius:7px 7px 0 0;overflow:hidden;}
+  .ro{background:var(--steel-800);padding:10px 14px;flex:1 1 120px;min-width:110px;}
+  .ro .k{font-family:var(--mono);font-size:9.5px;letter-spacing:.16em;text-transform:uppercase;color:var(--muted-l);}
+  .ro .v{font-family:var(--mono);font-size:18px;font-weight:600;color:#fff;margin-top:3px;}
+  .ro .v small{font-size:11px;color:var(--silver);font-weight:400;}
+  .badge{display:inline-block;padding:3px 9px;border-radius:4px;font-family:var(--mono);font-size:12px;font-weight:600;}
+  .badge.ok{background:var(--ok-soft);color:#1f6b49;} .badge.over{background:var(--warn-soft);color:var(--warn);} .badge.empty{background:#3a4049;color:#c2cad4;}
+  .grid{display:grid;grid-template-columns:262px 1fr;gap:18px;margin-top:34px;}
+  @media (max-width:900px){.grid{grid-template-columns:1fr;}}
+  .panel{background:var(--card);border:1px solid #cfd5db;border-radius:9px;box-shadow:0 2px 8px rgba(20,30,45,.05);}
+  .ph{padding:12px 15px;border-bottom:1px solid #e4e8ec;display:flex;align-items:center;justify-content:space-between;}
+  .ph h2{margin:0;font-size:12px;letter-spacing:.15em;text-transform:uppercase;color:var(--muted);font-weight:700;}
+  .cat{padding:11px 12px 3px;} .cat h3{margin:0 0 7px;font-family:var(--mono);font-size:9.5px;letter-spacing:.2em;text-transform:uppercase;color:var(--gold-d);}
+  .mods{display:flex;flex-direction:column;gap:6px;}
+  .mod{display:grid;grid-template-columns:34px 1fr auto;gap:9px;align-items:center;width:100%;text-align:left;background:#fafbfc;border:1px solid #d8dee4;border-radius:7px;padding:7px 9px;cursor:pointer;font-family:inherit;transition:border-color .12s,box-shadow .12s,transform .08s;}
+  .mod:hover{border-color:var(--gold);box-shadow:0 2px 8px rgba(217,147,39,.16);}
+  .mod:active{transform:translateY(1px);} .mod:focus-visible{outline:2px solid var(--gold);outline-offset:2px;}
+  .mod .g{width:34px;height:40px;}
+  .mod .code{font-family:var(--mono);font-size:10px;color:var(--muted);}
+  .mod .nm{font-size:12px;font-weight:600;line-height:1.12;margin-top:1px;}
+  .mod .dim{font-family:var(--mono);font-size:10px;color:var(--muted-l);margin-top:1px;}
+  .mod .add{font-family:var(--mono);font-size:17px;color:var(--gold-d);font-weight:700;}
+  .ov{display:flex;align-items:center;justify-content:space-between;padding:7px 9px;border:1px solid #d8dee4;border-radius:7px;background:#fafbfc;margin-bottom:6px;}
+  .ov label{font-size:12px;font-weight:600;display:flex;flex-direction:column;}
+  .ov label small{font-family:var(--mono);font-size:9.5px;color:var(--muted-l);font-weight:400;}
+  .sw{position:relative;width:38px;height:21px;flex:none;}
+  .sw input{opacity:0;width:0;height:0;} .sw span{position:absolute;inset:0;background:#cbd2d9;border-radius:20px;transition:.15s;cursor:pointer;}
+  .sw span:before{content:"";position:absolute;height:15px;width:15px;left:3px;top:3px;background:#fff;border-radius:50%;transition:.15s;}
+  .sw input:checked+span{background:var(--gold);} .sw input:checked+span:before{transform:translateX(17px);}
+  .sw input:focus-visible+span{outline:2px solid var(--gold);outline-offset:2px;}
+  .tools{display:flex;flex-wrap:wrap;gap:10px;align-items:center;padding:12px 15px;border-bottom:1px solid #e4e8ec;}
+  .field{display:flex;align-items:center;gap:7px;}
+  .field label{font-family:var(--mono);font-size:11px;text-transform:uppercase;color:var(--muted);}
+  .field input{width:92px;font-family:var(--mono);font-size:13px;padding:6px 8px;border:1px solid #c8cfd6;border-radius:6px;}
+  .field input:focus-visible{outline:2px solid var(--gold);outline-offset:1px;border-color:var(--gold);}
+  .presets{display:flex;gap:6px;flex-wrap:wrap;margin-left:auto;align-items:center;}
+  .btn{font-family:var(--sans);font-size:12px;font-weight:600;padding:6px 11px;border-radius:6px;border:1px solid #c8cfd6;background:#fff;cursor:pointer;color:var(--ink);}
+  .btn:hover{border-color:var(--gold);color:var(--gold-d);} .btn:focus-visible{outline:2px solid var(--gold);outline-offset:2px;}
+  .btn.ghost{border-style:dashed;color:var(--muted);}
+  .btn.cta{background:var(--gold);border-color:var(--gold);color:#1b1205;font-weight:700;}
+  .btn.cta:hover{background:var(--gold-d);color:#fff;}
+  .btn.wa{background:#25d366;border-color:#1da851;color:#06330f;font-weight:700;}
+  .btn.wa:hover{background:#1da851;color:#fff;}
+  .stage{position:relative;background:var(--steel-800);padding:14px;overflow-x:auto;}
+  .stage svg{display:block;} .stage-empty{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;flex-direction:column;gap:5px;color:var(--silver-d);pointer-events:none;}
+  .stage-empty .b{font-size:14px;font-weight:600;color:var(--silver);} .stage-empty .s{font-family:var(--mono);font-size:11px;}
+  .run{display:flex;flex-wrap:wrap;gap:6px;padding:12px 15px;border-top:1px solid #e4e8ec;}
+  .chip{display:inline-flex;align-items:center;gap:6px;background:#f3f5f7;border:1px solid #d6dce2;border-radius:20px;padding:4px 5px 4px 10px;font-size:12px;}
+  .chip .c{font-family:var(--mono);font-size:10px;color:var(--muted);}
+  .chip button{border:none;background:#e4e8ec;width:21px;height:21px;border-radius:50%;cursor:pointer;font-size:13px;color:var(--muted);display:grid;place-items:center;}
+  .chip button:hover{background:var(--warn);color:#fff;} .chip .mv{font-family:var(--mono);}
+  table{width:100%;border-collapse:collapse;font-size:13px;}
+  thead th{font-family:var(--mono);font-size:9.5px;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);text-align:left;padding:9px 11px;border-bottom:1px solid #e1e6ea;font-weight:600;}
+  thead th.r,tbody td.r{text-align:right;}
+  tbody td{padding:8px 11px;border-bottom:1px solid #eef1f4;}
+  tbody td .code{font-family:var(--mono);font-size:11px;color:var(--muted);}
+  tbody td.qty{font-family:var(--mono);font-weight:600;}
+  .pin{width:74px;font-family:var(--mono);font-size:12px;text-align:right;padding:5px 7px;border:1px solid #d2d8de;border-radius:5px;}
+  .pin:focus-visible{outline:2px solid var(--gold);outline-offset:1px;border-color:var(--gold);}
+  tfoot td{padding:12px 11px;font-weight:700;border-top:2px solid var(--ink);}
+  tfoot td.tot{font-family:var(--mono);font-size:16px;text-align:right;}
+  .bom-empty{padding:24px;text-align:center;color:var(--muted-l);font-size:13px;}
+  .note{font-size:11.5px;color:var(--muted);padding:10px 15px;border-top:1px solid #eef1f4;line-height:1.5;}
+  .note b{color:var(--gold-d);}
+  /* Vista final modal */
+  .modal{position:fixed;inset:0;background:rgba(18,22,28,.62);display:none;align-items:flex-start;justify-content:center;padding:24px 14px;overflow-y:auto;z-index:50;}
+  .modal.open{display:flex;}
+  .sheet{background:#fff;border-radius:12px;max-width:760px;width:100%;box-shadow:0 18px 50px rgba(0,0,0,.35);overflow:hidden;}
+  .sh-h{background:var(--steel-900);color:#fff;padding:16px 20px;display:flex;align-items:center;justify-content:space-between;}
+  .sh-h h2{margin:0;font-size:16px;text-transform:uppercase;letter-spacing:.04em;}
+  .sh-h .x{background:none;border:none;color:#cbd2d9;font-size:22px;cursor:pointer;line-height:1;}
+  .sh-b{padding:18px 20px;display:grid;grid-template-columns:1fr 1fr;gap:20px;}
+  @media (max-width:640px){.sh-b{grid-template-columns:1fr;}}
+  .spec{font-family:var(--mono);font-size:12px;}
+  .spec .row{display:flex;justify-content:space-between;padding:5px 0;border-bottom:1px solid #eef1f4;}
+  .spec .row .k{color:var(--muted);} .spec .row .v{font-weight:600;}
+  .spec h4{font-family:var(--sans);font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--gold-d);margin:0 0 6px;}
+  .form label{display:block;font-size:11px;font-family:var(--mono);text-transform:uppercase;letter-spacing:.06em;color:var(--muted);margin:9px 0 3px;}
+  .form input{width:100%;font-family:var(--sans);font-size:13px;padding:8px 10px;border:1px solid #c8cfd6;border-radius:6px;}
+  .form input:focus-visible{outline:2px solid var(--gold);outline-offset:1px;border-color:var(--gold);}
+  .form h4{font-family:var(--sans);font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--gold-d);margin:0 0 2px;}
+  .wa-wrap{margin-top:14px;} .wa-wrap a{display:flex;align-items:center;justify-content:center;gap:8px;text-decoration:none;}
+  .wa-hint{font-size:11px;color:var(--muted);margin-top:7px;text-align:center;}
+  footer{margin-top:24px;font-family:var(--mono);font-size:11px;color:var(--muted-l);text-align:center;}
+  @media (prefers-reduced-motion:reduce){*{transition:none!important;}}
+</style>
+</head>
+<body>
+<header><div class="hi">
+  <div class="brand"><span class="sp">SoluPark</span><span class="gl">Golden Line · Estaciones de taller</span></div>
+  <h1>Armá tu <span class="t">estación de trabajo</span></h1>
+  <p class="sub">Combiná bases y torres sobre tu pared. Sumá mesada, panel y luz. El sistema calcula medidas, peso, volumen y cuánto entra en un contenedor, y te arma la cotización por WhatsApp.</p>
+  <div class="readout" id="readout"></div>
+</div></header>
+
+<div class="wrap">
+  <div class="grid">
+    <aside class="panel" aria-label="Módulos">
+      <div class="ph"><h2>Columnas</h2></div>
+      <div id="palette"></div>
+      <div class="cat"><h3>Capas (se distribuyen solas)</h3><div id="overlays"></div></div>
+    </aside>
+
+    <section class="panel">
+      <div class="tools">
+        <div class="field"><label for="avail">Pared</label><input type="number" id="avail" value="3500" min="600" max="12000" step="50"><span style="font-family:var(--mono);font-size:11px;color:var(--muted)">mm</span></div>
+        <div class="presets" id="presets"></div>
+      </div>
+      <div class="stage" id="stage">
+        <svg id="svg" width="100%" height="300" role="img" aria-label="Vista a escala de la estación"></svg>
+        <div class="stage-empty" id="empty"><span class="b">Pared vacía</span><span class="s">Tocá una columna para empezar</span></div>
+      </div>
+      <div class="run" id="run"></div>
+    </section>
+  </div>
+
+  <div class="panel" style="margin-top:18px;">
+    <div class="ph"><h2>Lista de piezas y costo</h2><div style="display:flex;gap:8px;"><button class="btn ghost" id="clear">Vaciar</button><button class="btn cta" id="quote">Pedir cotización →</button></div></div>
+    <table>
+      <thead><tr><th>Módulo</th><th>Descripción</th><th class="r">Cant.</th><th class="r">N.W. (kg)</th><th class="r">Precio venta US$</th><th class="r">Subtotal</th></tr></thead>
+      <tbody id="bom"></tbody>
+      <tfoot id="foot"></tfoot>
+    </table>
+    <p class="note"><b>Precios de venta editables.</b> Cargá el precio de venta de SoluPark por módulo y el total se recalcula. (El costo de importación se maneja aparte, en la planilla interna; acá va el precio al cliente, aún a definir.) Las capas (mesada, panel, luz, superiores) se distribuyen automáticamente según el largo de bases. Peso y volumen salen de las medidas de embalaje del catálogo. Datos: serie GLG6000.</p>
+  </div>
+  <footer>Configurador v1 · pared recta · datos Golden Line GLG6000 · MVP para integrar a solupark.uy</footer>
+</div>
+
+<!-- VISTA FINAL -->
+<div class="modal" id="modal" role="dialog" aria-modal="true" aria-labelledby="mt">
+  <div class="sheet">
+    <div class="sh-h"><h2 id="mt">Vista final · Cotización</h2><button class="x" id="closeM" aria-label="Cerrar">×</button></div>
+    <div class="sh-b">
+      <div class="spec" id="finalSpec"></div>
+      <div class="form">
+        <h4>Solicitar cotización</h4>
+        <p style="font-size:11.5px;color:var(--muted);margin:2px 0 4px;">Completá tus datos y enviá el detalle por WhatsApp.</p>
+        <label>Nombre y apellido</label><input id="f_nombre" autocomplete="name">
+        <label>Documento</label><input id="f_doc">
+        <label>Ubicación</label><input id="f_ubic">
+        <label>Correo</label><input id="f_mail" type="email" autocomplete="email">
+        <label>Teléfono</label><input id="f_tel" inputmode="tel" autocomplete="tel">
+        <div class="wa-wrap"><a class="btn wa" id="waBtn" href="#" target="_blank" rel="noopener">
+          <svg width="17" height="17" viewBox="0 0 24 24" fill="currentColor"><path d="M.057 24l1.687-6.163a11.867 11.867 0 01-1.587-5.945C.16 5.335 5.495 0 12.05 0a11.82 11.82 0 018.413 3.488 11.82 11.82 0 013.48 8.414c-.003 6.557-5.338 11.892-11.893 11.892a11.9 11.9 0 01-5.688-1.448L.057 24zm6.597-3.807c1.676.995 3.276 1.591 5.392 1.592 5.448 0 9.886-4.434 9.889-9.885.002-5.462-4.415-9.89-9.881-9.892-5.452 0-9.887 4.434-9.889 9.884a9.86 9.86 0 001.519 5.26l-.999 3.648 3.97-1.607zm11.387-5.464c-.074-.124-.272-.198-.57-.347-.297-.149-1.758-.868-2.031-.967-.272-.099-.47-.149-.669.149-.198.297-.768.967-.941 1.165-.173.198-.347.223-.644.074-.297-.149-1.255-.462-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.297-.347.446-.521.151-.172.2-.296.3-.495.099-.198.05-.372-.025-.521-.075-.148-.669-1.611-.916-2.206-.242-.579-.487-.501-.669-.51l-.57-.01c-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.626.712.226 1.36.194 1.872.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413z"/></svg>
+          <span id="waLabel">Enviar por WhatsApp</span></a></div>
+        <p class="wa-hint">Se abre WhatsApp con el detalle ya escrito. Lo revisás y tocás enviar.</p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+/* ===== Datos reales — Golden Line GLG6000 (catálogo 2026) =====
+   clase: columna (ocupa ancho) | overlay (capa). dims/peso del catálogo.  */
+const M={
+ 'GLG6013':{n:'Torre alta',cl:'columna',sub:'tower',W:915,D:460,H:2000,eW:980,eD:535,eH:2020,nw:77.5,gw:85.5,fob:0},
+ 'GLG6002':{n:'Torre angosta',cl:'columna',sub:'tower',W:600,D:460,H:2000,eW:665,eD:540,eH:2020,nw:52,gw:58,fob:0},
+ 'GLG6003':{n:'Base con puertas',cl:'columna',sub:'door',W:680,D:460,H:910,eW:745,eD:525,eH:945,nw:27.5,gw:31,fob:0},
+ 'GLG6004':{n:'Base 4 cajones',cl:'columna',sub:'drawer',W:680,D:460,H:910,eW:745,eD:525,eH:945,nw:47.2,gw:51,fob:0},
+ 'GLG6005':{n:'Base 6 cajones',cl:'columna',sub:'drawer',W:680,D:460,H:910,eW:745,eD:525,eH:945,nw:48.5,gw:52,fob:0},
+ 'GLG6011':{n:'Base cajones',cl:'columna',sub:'drawer',W:680,D:460,H:910,eW:745,eD:525,eH:945,nw:35.4,gw:39,fob:0},
+ 'GLG6012':{n:'Cajonera',cl:'columna',sub:'drawer',W:658,D:460,H:895,eW:725,eD:525,eH:815,nw:48,gw:51.5,fob:0},
+ // overlays
+ 'GLG6006':{n:'Mesada',cl:'overlay',key:'top',W:1052,D:605,H:28,eW:1090,eD:635,eH:55,nw:6.2,gw:8.1,fob:0},
+ 'GLG6009':{n:'Panel perforado',cl:'overlay',key:'peg',W:1362,D:467,H:36,eW:1410,eD:495,eH:60,nw:8.9,gw:10,fob:0},
+ 'GLG6008':{n:'Barra LED',cl:'overlay',key:'led',W:1420,D:50.5,H:30,eW:1460,eD:90,eH:50,nw:3.4,gw:3.8,fob:0},
+ 'GLG6001':{n:'Módulo superior',cl:'overlay',key:'upper',W:680,D:281,H:350,eW:745,eD:350,eH:430,nw:10.5,gw:12.5,fob:0},
+};
+const COLS=['GLG6013','GLG6002','GLG6003','GLG6004','GLG6005','GLG6011','GLG6012'];
+const OVR=[['top','Mesada','GLG6006'],['peg','Panel perforado','GLG6009'],['led','Barra LED','GLG6008'],['upper','Módulos superiores','GLG6001']];
+const PRESETS={'Taller chico':['GLG6013','GLG6004','GLG6003','GLG6013'],
+  'Taller estándar':['GLG6013','GLG6005','GLG6004','GLG6003','GLG6012','GLG6013'],
+  'Pared completa':['GLG6013','GLG6011','GLG6004','GLG6005','GLG6003','GLG6012','GLG6002']};
+const CONT20=28, CONT40=68; // CBM cargables aprox.
+const WA='59892877444';
+
+const st={avail:3500,items:[],ovr:{top:true,peg:true,led:false,upper:false},fob:{}};
+Object.keys(M).forEach(k=>st.fob[k]=M[k].fob);
+const $=s=>document.querySelector(s);
+const money=n=>'US$ '+Math.round(n).toLocaleString('es-UY');
+const vol=c=>M[c].eW*M[c].eD*M[c].eH/1e9;
+
+/* glyphs */
+function glyph(c){const m=M[c];const peg=`<rect x="5" y="2" width="24" height="11" fill="#dfe3e8" stroke="#9aa2ad"/>`;
+ if(m.sub==='tower')return `<svg viewBox="0 0 34 40"><rect x="9" y="2" width="16" height="36" rx="1" fill="#cdb27a" stroke="#9a7d3e"/><line x1="17" y1="2" x2="17" y2="38" stroke="#9a7d3e" stroke-width=".6"/></svg>`;
+ let b='';if(m.sub==='drawer')b=[0,1,2,3].map(i=>`<rect x="8" y="${18+i*5}" width="18" height="3.6" fill="#cdd3da" stroke="#9aa2ad" stroke-width=".5"/>`).join('');
+ else b=`<rect x="8" y="18" width="18" height="20" fill="#cdd3da" stroke="#9aa2ad"/><line x1="17" y1="18" x2="17" y2="38" stroke="#9aa2ad"/>`;
+ return `<svg viewBox="0 0 34 40">${peg}<rect x="6" y="16" width="22" height="2.5" fill="#8b94a0"/>${b}</svg>`;}
+
+function buildPalette(){const p=$('#palette');p.innerHTML='';const box=document.createElement('div');box.className='cat';
+ box.innerHTML='<h3>Bases y torres</h3>';const list=document.createElement('div');list.className='mods';
+ COLS.forEach(c=>{const m=M[c];const b=document.createElement('button');b.className='mod';b.type='button';
+  b.setAttribute('aria-label','Agregar '+m.n+' '+c);
+  b.innerHTML=`<span class="g">${glyph(c)}</span><span><span class="code">${c}</span><span class="nm">${m.n}</span><span class="dim">${m.W}×${m.D}×${m.H}</span></span><span class="add">+</span>`;
+  b.onclick=()=>{st.items.push(c);render();};list.appendChild(b);});
+ box.appendChild(list);p.appendChild(box);
+ const o=$('#overlays');o.innerHTML='';OVR.forEach(([key,label,code])=>{const d=document.createElement('div');d.className='ov';
+  d.innerHTML=`<label>${label}<small>${code} · auto</small></label><span class="sw"><input type="checkbox" ${st.ovr[key]?'checked':''} aria-label="${label}"><span></span></span>`;
+  d.querySelector('input').onchange=e=>{st.ovr[key]=e.target.checked;render();};o.appendChild(d);});}
+
+function buildPresets(){const w=$('#presets');w.innerHTML='<span style="font-family:var(--mono);font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:#9aa2ad">Plantillas:</span>';
+ Object.keys(PRESETS).forEach(n=>{const b=document.createElement('button');b.className='btn';b.type='button';b.textContent=n;
+  b.onclick=()=>{st.items=[...PRESETS[n]];render();};w.appendChild(b);});}
+
+/* derived */
+function calc(){
+ const cols=st.items.map(c=>M[c]);
+ const totalW=cols.reduce((s,m)=>s+m.W,0);
+ const baseW=st.items.filter(c=>M[c].sub!=='tower').reduce((s,c)=>s+M[c].W,0);
+ // overlay quantities
+ const ov={};
+ OVR.forEach(([key,,code])=>{ if(st.ovr[key] && baseW>0){ ov[code]=Math.ceil(baseW/M[code].W);} });
+ // bom counts
+ const counts={};st.items.forEach(c=>counts[c]=(counts[c]||0)+1);
+ Object.entries(ov).forEach(([c,q])=>counts[c]=(counts[c]||0)+q);
+ let nw=0,gw=0,cbm=0,fob=0;
+ Object.entries(counts).forEach(([c,q])=>{nw+=M[c].nw*q;gw+=M[c].gw*q;cbm+=vol(c)*q;fob+=(st.fob[c]||0)*q;});
+ return {totalW,baseW,counts,nw,gw,cbm,fob,fits:totalW<=st.avail};
+}
+
+function readout(){const d=calc();let badge;
+ if(!st.items.length)badge='<span class="badge empty">SIN MÓDULOS</span>';
+ else badge=d.fits?'<span class="badge ok">ENTRA ✓</span>':`<span class="badge over">EXCEDE +${d.totalW-st.avail}</span>`;
+ const pct=Math.round(d.cbm/CONT20*100);
+ $('#readout').innerHTML=`
+  <div class="ro"><div class="k">Ancho total</div><div class="v">${d.totalW.toLocaleString('es-UY')} <small>mm</small></div></div>
+  <div class="ro"><div class="k">Estado</div><div class="v" style="font-size:15px">${badge}</div></div>
+  <div class="ro"><div class="k">Peso neto</div><div class="v">${Math.round(d.nw)} <small>kg</small></div></div>
+  <div class="ro"><div class="k">Volumen</div><div class="v">${d.cbm.toFixed(2)} <small>CBM</small></div></div>
+  <div class="ro"><div class="k">Contenedor 20'</div><div class="v">${pct}<small>%</small></div></div>
+  <div class="ro"><div class="k">Precio total</div><div class="v">${money(d.fob)}</div></div>`;}
+
+/* drawing */
+function draw(){const svg=$('#svg');const d=calc();const total=d.totalW;
+ const drawnW=Math.max(total,st.avail,1);const pad={l:16,r:16,t:10,b:50};
+ const cw=Math.max(svg.clientWidth||840,320);const usable=cw-pad.l-pad.r;
+ let sc=Math.min(usable/drawnW,0.24);const ground=pad.t+2000*sc;svg.setAttribute('height',ground+pad.b);
+ const x0=pad.l;let g='';let x=x0;
+ const baseTop=ground-910*sc,wtTop=ground-940*sc,pegTop=ground-1900*sc,pegBot=ground-1120*sc,ledY=ground-1955*sc,upTop=ground-1450*sc,upBot=ground-1120*sc;
+ const stk='#7a6a45';
+ st.items.forEach((c,i)=>{const m=M[c];const w=m.W*sc;const isT=m.sub==='tower';
+  let p='';
+  if(isT){p=`<rect x="${x}" y="${ground-2000*sc}" width="${w}" height="${2000*sc}" fill="#c9b178" stroke="${stk}"/><line x1="${x+w/2}" y1="${ground-2000*sc}" x2="${x+w/2}" y2="${ground}" stroke="${stk}" stroke-width=".7"/>`;}
+  else{
+   // peg + led + worktop overlays drawn per-base for continuity
+   if(st.ovr.peg)p+=`<rect x="${x}" y="${pegTop}" width="${w}" height="${pegBot-pegTop}" fill="url(#pg)" stroke="${stk}" stroke-width=".5"/>`;
+   if(st.ovr.upper)p+=`<rect x="${x+1}" y="${upTop}" width="${w-2}" height="${upBot-upTop}" fill="#cdb480" stroke="${stk}" stroke-width=".6"/>`;
+   if(st.ovr.led)p+=`<rect x="${x}" y="${ledY}" width="${w}" height="${Math.max(2,6*sc)}" fill="#ffe08a" stroke="#caa53a" stroke-width=".4"/>`;
+   if(st.ovr.top)p+=`<rect x="${x}" y="${wtTop}" width="${w}" height="${Math.max(2,(940-910)*sc)}" fill="#6e5a32"/>`;
+   p+=`<rect x="${x}" y="${baseTop}" width="${w}" height="${ground-baseTop}" fill="#c9b178" stroke="${stk}"/>`;
+   if(m.sub==='drawer'){const n=4,ch=(ground-baseTop)/n;for(let k=0;k<n;k++){const dy=baseTop+k*ch;p+=`<rect x="${x+2}" y="${dy+1.5}" width="${w-4}" height="${ch-3}" fill="#d4be86" stroke="#a98c46" stroke-width=".5"/><rect x="${x+w/2-6}" y="${dy+ch/2-1}" width="12" height="2" rx="1" fill="#8a7038"/>`;}}
+   else{p+=`<line x1="${x+w/2}" y1="${baseTop}" x2="${x+w/2}" y2="${ground}" stroke="#a98c46"/><rect x="${x+w/2-7}" y="${baseTop+(ground-baseTop)/2-8}" width="2.4" height="16" rx="1.2" fill="#8a7038"/><rect x="${x+w/2+5}" y="${baseTop+(ground-baseTop)/2-8}" width="2.4" height="16" rx="1.2" fill="#8a7038"/>`;}
+  }
+  g+=`<g opacity="0">${p}<text x="${x+w/2}" y="${ground+14}" font-family="monospace" font-size="9.5" fill="#aeb6c0" text-anchor="middle">${m.W}</text><animate attributeName="opacity" from="0" to="1" dur="0.26s" begin="${i*40}ms" fill="freeze"/></g>`;
+  x+=w;});
+ // dimension line
+ let dim='';if(total>0){const dy=ground+32,tp=total*sc;dim=`<line x1="${x0}" y1="${dy}" x2="${x0+tp}" y2="${dy}" stroke="#d99327"/><line x1="${x0}" y1="${dy-4}" x2="${x0}" y2="${dy+4}" stroke="#d99327"/><line x1="${x0+tp}" y1="${dy-4}" x2="${x0+tp}" y2="${dy+4}" stroke="#d99327"/><rect x="${x0+tp/2-32}" y="${dy-9}" width="64" height="16" fill="#1d2026"/><text x="${x0+tp/2}" y="${dy+3}" font-family="monospace" font-size="11" fill="#fff" text-anchor="middle">${total} mm</text>`;}
+ const ax=x0+st.avail*sc;let am='';if(ax<=cw-2)am=`<line x1="${ax}" y1="${pad.t}" x2="${ax}" y2="${ground+6}" stroke="#d99327" stroke-dasharray="4 3" opacity=".7"/><text x="${ax-4}" y="${pad.t+10}" font-family="monospace" font-size="9" fill="#e3b86a" text-anchor="end">pared ${st.avail}</text>`;
+ let over='';if(total>st.avail){const ox=x0+st.avail*sc,ow=Math.min((total-st.avail)*sc,cw-ox-2);over=`<rect x="${ox}" y="${pad.t}" width="${ow}" height="${ground-pad.t}" fill="#ec5a23" opacity=".12"/>`;}
+ svg.innerHTML=`<defs><pattern id="pg" width="8" height="8" patternUnits="userSpaceOnUse"><rect width="8" height="8" fill="#d9cfa8"/><circle cx="4" cy="4" r="1" fill="#b9a874"/></pattern></defs>${over}<line x1="${x0}" y1="${ground}" x2="${cw-pad.r}" y2="${ground}" stroke="#454c56" stroke-width="1.5"/>${g}${am}${dim}`;
+ $('#empty').style.display=st.items.length?'none':'flex';}
+
+function buildRun(){const r=$('#run');r.innerHTML='';if(!st.items.length)return;
+ st.items.forEach((c,i)=>{const m=M[c];const ch=document.createElement('span');ch.className='chip';
+  ch.innerHTML=`<span class="c">${c}</span><span>${m.n}</span>`;
+  const L=document.createElement('button');L.className='mv';L.innerHTML='‹';L.title='Izquierda';L.onclick=()=>{if(i>0){[st.items[i-1],st.items[i]]=[st.items[i],st.items[i-1]];render();}};
+  const R=document.createElement('button');R.className='mv';R.innerHTML='›';R.title='Derecha';R.onclick=()=>{if(i<st.items.length-1){[st.items[i+1],st.items[i]]=[st.items[i],st.items[i+1]];render();}};
+  const X=document.createElement('button');X.innerHTML='×';X.title='Quitar';X.onclick=()=>{st.items.splice(i,1);render();};
+  ch.append(L,R,X);r.appendChild(ch);});}
+
+function buildBOM(){const b=$('#bom'),f=$('#foot');const d=calc();const codes=Object.keys(d.counts);
+ if(!codes.length){b.innerHTML='<tr><td colspan="6" class="bom-empty">Agregá módulos para ver la lista.</td></tr>';f.innerHTML='';return;}
+ // order: columns first (in palette order), then overlays
+ const order=[...COLS,...OVR.map(o=>o[2])];
+ codes.sort((a,b2)=>order.indexOf(a)-order.indexOf(b2));
+ b.innerHTML=codes.map(c=>{const m=M[c],q=d.counts[c],u=st.fob[c]||0;const tag=m.cl==='overlay'?' <span style="font-size:9px;color:#b3751a;font-family:var(--mono)">capa</span>':'';
+  return `<tr><td><span class="code">${c}</span></td><td>${m.n}${tag}</td><td class="r qty">×${q}</td><td class="r"><span class="code">${(m.nw*q).toFixed(1)}</span></td><td class="r"><input class="pin" type="number" min="0" step="1" value="${u}" data-c="${c}" aria-label="Precio ${c}"></td><td class="r"><span class="code">${money(u*q)}</span></td></tr>`;}).join('');
+ f.innerHTML=`<tr><td colspan="3">Totales</td><td class="r"><span class="code" style="font-weight:700">${d.nw.toFixed(0)} kg</span></td><td></td><td class="tot">${money(d.fob)}</td></tr>`;
+ b.querySelectorAll('.pin').forEach(i=>i.addEventListener('input',e=>{const v=parseFloat(e.target.value);st.fob[e.target.dataset.c]=isNaN(v)?0:v;
+   const d2=calc();readout();f.querySelector('.tot').textContent=money(d2.fob);
+   e.target.closest('tr').querySelector('td:last-child .code').textContent=money((st.fob[e.target.dataset.c]||0)*d2.counts[e.target.dataset.c]);}));}
+
+function render(){readout();draw();buildRun();buildBOM();}
+
+/* ===== Vista final + WhatsApp ===== */
+function bomLines(){const d=calc();const order=[...COLS,...OVR.map(o=>o[2])];
+ return Object.keys(d.counts).sort((a,b)=>order.indexOf(a)-order.indexOf(b)).map(c=>`• ${c} ${M[c].n} ×${d.counts[c]}`).join('\n');}
+function openModal(){const d=calc();const pct20=Math.round(d.cbm/CONT20*100),pct40=Math.round(d.cbm/CONT40*100);
+ $('#finalSpec').innerHTML=`<h4>Ficha de la estación</h4>
+   <div class="row"><span class="k">Ancho total</span><span class="v">${d.totalW} mm</span></div>
+   <div class="row"><span class="k">Pared disponible</span><span class="v">${st.avail} mm</span></div>
+   <div class="row"><span class="k">Estado</span><span class="v">${d.fits?'Entra':'Excede '+(d.totalW-st.avail)+' mm'}</span></div>
+   <div class="row"><span class="k">N° de módulos</span><span class="v">${Object.values(d.counts).reduce((a,b)=>a+b,0)}</span></div>
+   <div class="row"><span class="k">Peso neto / bruto</span><span class="v">${d.nw.toFixed(0)} / ${d.gw.toFixed(0)} kg</span></div>
+   <div class="row"><span class="k">Volumen</span><span class="v">${d.cbm.toFixed(2)} CBM</span></div>
+   <div class="row"><span class="k">Contenedor 20' / 40'</span><span class="v">${pct20}% / ${pct40}%</span></div>
+   <div class="row"><span class="k">Precio total (orient.)</span><span class="v">${money(d.fob)}</span></div>
+   <h4 style="margin-top:12px">Piezas</h4><div style="white-space:pre-line;color:#444;font-size:11px">${bomLines()}</div>`;
+ updateWA();$('#modal').classList.add('open');}
+function updateWA(){const d=calc();const n=$('#f_nombre').value.trim();
+ let t=`Hola SoluPark! Quiero cotizar esta estación de trabajo (Golden Line):\n\n`;
+ t+=`Ancho: ${d.totalW} mm (pared ${st.avail} mm)\nPeso: ${d.nw.toFixed(0)} kg neto / ${d.gw.toFixed(0)} kg bruto\nVolumen: ${d.cbm.toFixed(2)} CBM\n\nPiezas:\n${bomLines()}\n\n`;
+ const dat=[['Nombre',n],['Documento',$('#f_doc').value.trim()],['Ubicación',$('#f_ubic').value.trim()],['Correo',$('#f_mail').value.trim()],['Teléfono',$('#f_tel').value.trim()]].filter(x=>x[1]);
+ if(dat.length)t+='Mis datos:\n'+dat.map(x=>`${x[0]}: ${x[1]}`).join('\n');
+ $('#waBtn').href=`https://wa.me/${WA}?text=${encodeURIComponent(t)}`;}
+['f_nombre','f_doc','f_ubic','f_mail','f_tel'].forEach(id=>document.addEventListener('input',e=>{if(e.target.id===id)updateWA();}));
+
+$('#avail').addEventListener('input',e=>{const v=parseInt(e.target.value);st.avail=isNaN(v)?0:v;readout();draw();});
+$('#clear').onclick=()=>{st.items=[];render();};
+$('#quote').onclick=()=>{if(!st.items.length){alert('Agregá al menos un módulo.');return;}openModal();};
+$('#closeM').onclick=()=>$('#modal').classList.remove('open');
+$('#modal').addEventListener('click',e=>{if(e.target.id==='modal')$('#modal').classList.remove('open');});
+window.addEventListener('resize',draw);
+buildPalette();buildPresets();render();
+</script>
+</body>
+</html>

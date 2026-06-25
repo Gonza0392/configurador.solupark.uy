@@ -1,0 +1,28 @@
+.bom-panel { margin-top: 18px; }
+.bom-scroll { overflow-x: auto; }
+.bom-table { width: 100%; border-collapse: collapse; font-size: 13px; min-width: 600px; }
+.bom-table thead th {
+  font-family: var(--mono); font-size: 9.5px; letter-spacing: .1em;
+  text-transform: uppercase; color: var(--muted);
+  text-align: left; padding: 9px 11px;
+  border-bottom: 1px solid #e1e6ea; font-weight: 600;
+}
+.bom-table thead th.r, .bom-table tbody td.r { text-align: right; }
+.bom-table tbody td { padding: 8px 11px; border-bottom: 1px solid #eef1f4; }
+.bom-table tbody td .code { font-family: var(--mono); font-size: 11px; color: var(--muted); }
+.bom-table tbody td.qty { font-family: var(--mono); font-weight: 600; }
+.bom-table .pin {
+  width: 84px; font-family: var(--mono); font-size: 12px;
+  text-align: right; padding: 5px 7px;
+  border: 1px solid #d2d8de; border-radius: 5px;
+}
+.bom-table .pin:focus-visible { outline: 2px solid var(--gold); outline-offset: 1px; border-color: var(--gold); }
+.bom-table tfoot td { padding: 12px 11px; font-weight: 700; border-top: 2px solid var(--ink); }
+.bom-table tfoot td.tot { font-family: var(--mono); font-size: 16px; text-align: right; }
+.bom-empty { padding: 22px; text-align: center; color: var(--muted-l); font-size: 13px; }
+.bom-note { font-size: 11.5px; color: var(--muted); padding: 10px 15px; border-top: 1px solid #eef1f4; line-height: 1.5; }
+.bom-note b { color: var(--gold-d); }
+.bom-table .tag {
+  font-size: 9px; color: var(--gold-d); font-family: var(--mono);
+  margin-left: 4px; text-transform: uppercase;
+}
