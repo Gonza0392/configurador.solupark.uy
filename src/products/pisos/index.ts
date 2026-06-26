@@ -1,20 +1,19 @@
 import type { ProductModule } from '../../shell/types'
+import { PisosConfigurator } from './PisosConfigurator'
+import { calcPisos } from './calc'
+import { initialPisosState, type PisosState } from './state'
 
-type PisosState = { __placeholder: true }
-
-/** Placeholder hasta el hito 3. Aparece en el selector como "Próximamente". */
-export const pisosPlaceholder: ProductModule<PisosState> = {
+export const pisosModule: ProductModule<PisosState> = {
   id: 'pisos',
   name: 'Pisos rejilla encastrable',
-  tagline: 'Baldosa SoluPark 40×40 cm',
-  comingSoon: true,
-  steps: [],
-  initialState: { __placeholder: true },
+  tagline: 'Armá tu piso de baldosa rejilla',
+  subtitle:
+    'Baldosa de polipropileno 40×40 cm, 4 Ton/m². Elegí medidas, bordes y color, y armá la cotización por WhatsApp.',
+  steps: ['Ficha técnica', 'Personalizar', 'Resumen'],
+  hideBomBeforeStep: 1,
+  initialState: initialPisosState,
   icon: '▦',
-  calc: () => ({
-    bom: [], metrics: [], totalPriceUsd: 0, totalNwKg: 0, totalGwKg: 0, totalCbm: 0,
-    spec: [], whatsappBody: '', isValid: false, invalidReason: 'En construcción',
-  }),
-  setPrice: (s) => s,
-  Configurator: () => null,
+  calc: (s) => calcPisos(s),
+  setPrice: (s, sku, price) => ({ ...s, prices: { ...s.prices, [sku]: price } }),
+  Configurator: PisosConfigurator,
 }

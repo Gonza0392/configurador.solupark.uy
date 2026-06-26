@@ -43,6 +43,9 @@ export type ConfiguratorProps<T> = {
   step: number
   setStep: (i: number) => void
   calc: CalcResult
+  /** Abre la modal Vista Final del shell (= "Pedir cotización"). El shell
+   *  valida calc.isValid antes de abrir y muestra el invalidReason si no. */
+  openFinalView: () => void
 }
 
 export interface ProductModule<T = unknown> {
@@ -63,6 +66,9 @@ export interface ProductModule<T = unknown> {
   icon?: ReactNode
   /** Si true: aparece en el selector pero deshabilitado. */
   comingSoon?: boolean
+  /** Si está definido, el shell oculta el BOM cuando step < hideBomBeforeStep.
+   *  Útil para pasos puramente informativos (ej. ficha técnica). */
+  hideBomBeforeStep?: number
 }
 
 /** Versión sin generics para almacenar en arrays/registries. */

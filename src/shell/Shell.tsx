@@ -41,6 +41,14 @@ function ProductHost({ module, onBack }: { module: AnyProductModule; onBack: () 
   const onPriceChange = (sku: string, price: number) =>
     setStateRaw((prev: any) => module.setPrice(prev, sku, price))
 
+  const openFinalView = () => {
+    if (!calc.isValid) {
+      alert(calc.invalidReason ?? 'Completá los datos antes de cotizar.')
+      return
+    }
+    setModalOpen(true)
+  }
+
   const Configurator = module.Configurator
   const showStepper = module.steps.length > 1
 
@@ -68,21 +76,18 @@ function ProductHost({ module, onBack }: { module: AnyProductModule; onBack: () 
           step={step}
           setStep={setStep}
           calc={calc}
+          openFinalView={openFinalView}
         />
-        <BOM
-          calc={calc}
-          onPriceChange={onPriceChange}
-          onClear={() => {
-            if (confirm('¿Vaciar el armado actual?')) setStateRaw(module.initialState)
-          }}
-          onQuote={() => {
-            if (!calc.isValid) {
-              alert(calc.invalidReason ?? 'Agregá algo antes de cotizar.')
-              return
-            }
-            setModalOpen(true)
-          }}
-        />
+        {step >= (module.hideBomBeforeStep ?? 0) && (
+          <BOM
+            calc={calc}
+            onPriceChange={onPriceChange}
+            onClear={() => {
+              if (confirm('¿Vaciar el armado actual?')) setStateRaw(module.initialState)
+            }}
+            onQuote={openFinalView}
+          />
+        )}
       </div>
       <FinalView
         open={modalOpen}

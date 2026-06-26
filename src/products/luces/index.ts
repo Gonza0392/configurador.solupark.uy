@@ -1,20 +1,19 @@
 import type { ProductModule } from '../../shell/types'
+import { LucesConfigurator } from './LucesConfigurator'
+import { calcLuces } from './calc'
+import { initialLucesState, type LucesState } from './state'
 
-type LucesState = { __placeholder: true }
-
-/** Placeholder hasta el hito 4. Aparece en el selector como "Próximamente". */
-export const lucesPlaceholder: ProductModule<LucesState> = {
+export const lucesModule: ProductModule<LucesState> = {
   id: 'luces',
-  name: 'Luces LED hexagonales',
-  tagline: 'Paneles modulares conectables',
-  comingSoon: true,
-  steps: [],
-  initialState: { __placeholder: true },
+  name: 'Luces LED',
+  tagline: 'Iluminá tu taller con paneles LED',
+  subtitle:
+    'Hexagonales modulares (conectables entre sí) o rectangulares standalone. Marca SoluPark.',
+  steps: ['Ficha técnica', 'Personalizar', 'Resumen'],
+  hideBomBeforeStep: 1,
+  initialState: initialLucesState,
   icon: '⬡',
-  calc: () => ({
-    bom: [], metrics: [], totalPriceUsd: 0, totalNwKg: 0, totalGwKg: 0, totalCbm: 0,
-    spec: [], whatsappBody: '', isValid: false, invalidReason: 'En construcción',
-  }),
-  setPrice: (s) => s,
-  Configurator: () => null,
+  calc: (s) => calcLuces(s),
+  setPrice: (s, sku, price) => ({ ...s, prices: { ...s.prices, [sku]: price } }),
+  Configurator: LucesConfigurator,
 }
