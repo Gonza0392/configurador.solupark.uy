@@ -1,0 +1,11 @@
+node_modules
+dist
+.DS_Store
+*.local
+.env
+.env.*
+!.env.example
+_xlsx_dump
+
+# Claude Code — personal permission grants per machine
+.claude/settings.local.json

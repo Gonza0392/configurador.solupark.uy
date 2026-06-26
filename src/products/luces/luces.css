@@ -1,0 +1,176 @@
+/* ========== Ficha técnica · 2 modelos ========== */
+.luces-ficha { margin-top: 22px; }
+.ficha-body-2 {
+  display: grid; grid-template-columns: 1fr 1fr;
+  gap: 16px; padding: 20px;
+}
+@media (max-width: 720px) { .ficha-body-2 { grid-template-columns: 1fr; } }
+.model-card {
+  background: #fafbfc; border: 1px solid #d8dee4;
+  border-radius: 10px; padding: 18px;
+}
+.model-card-icon {
+  display: inline-flex; align-items: center; justify-content: center;
+  width: 48px; height: 48px;
+  background: var(--gold-soft); color: var(--gold-d);
+  border-radius: 10px; font-size: 28px; line-height: 1;
+  margin-bottom: 10px;
+}
+.model-card h3 {
+  margin: 0 0 6px; font-size: 17px; font-weight: 700;
+  text-transform: uppercase; letter-spacing: -.01em;
+}
+.model-card-sku { margin: 0 0 8px; font-family: var(--mono); font-size: 11px; color: var(--muted); }
+.model-card-layout { margin: 0 0 8px; font-size: 12.5px; color: var(--ink); line-height: 1.5; }
+.model-card-size  { margin: 0 0 8px; font-size: 12px; color: var(--ink); }
+.model-card-price { margin: 0 0 10px; font-size: 14px; color: var(--ink); }
+.model-card-price strong { color: var(--gold-d); font-size: 18px; }
+.model-card-price em { font-style: normal; color: var(--muted); font-size: 11px; }
+.model-card-parts summary {
+  cursor: pointer; font-size: 11.5px; color: var(--muted);
+  padding: 4px 0;
+}
+.model-card-parts summary:hover { color: var(--gold-d); }
+.model-card-parts ul {
+  margin: 6px 0 0; padding-left: 18px;
+  font-size: 11.5px; line-height: 1.65; color: var(--ink);
+}
+.model-card-parts strong { color: var(--gold-d); font-family: var(--mono); }
+.ficha-actions {
+  padding: 16px 20px 20px;
+  border-top: 1px solid #eef1f4;
+  display: flex; flex-direction: column; gap: 12px; align-items: flex-start;
+}
+.ficha-foot { margin: 0; font-size: 12.5px; color: var(--muted); line-height: 1.5; }
+.ficha-foot strong { color: var(--ink); }
+
+/* ========== Layout 60/40 ========== */
+.luces-grid {
+  display: grid; grid-template-columns: minmax(0, 3fr) minmax(0, 2fr);
+  gap: 18px; margin-top: 22px;
+}
+@media (max-width: 1100px) { .luces-grid { grid-template-columns: 1fr; } }
+
+/* ========== Cobertura SVG stage ========== */
+.luces-canvas-panel .hex-stage,
+.hex-stage {
+  background: var(--steel-800);
+  padding: 8px; min-height: 260px;
+  display: flex; flex-direction: column;
+  align-items: center; justify-content: center;
+}
+.hex-stage svg { display: block; max-width: 100%; }
+.hex-stage.empty { color: var(--silver-d); padding: 40px 16px; }
+.rect-empty {
+  display: flex; flex-direction: column; gap: 4px;
+  align-items: center; text-align: center;
+  color: var(--silver-d);
+}
+.rect-empty strong { color: var(--silver); font-size: 14px; }
+.rect-empty span { font-family: var(--mono); font-size: 11px; }
+.hex-meta {
+  margin-top: 10px; padding: 6px 12px;
+  background: var(--steel-900); border-radius: 6px;
+  font-family: var(--mono); font-size: 11px;
+  color: var(--silver-l); display: flex; gap: 8px; flex-wrap: wrap;
+  justify-content: center;
+}
+.hex-meta b { color: #fff; }
+.hex-meta .sep { color: var(--muted); }
+
+/* ========== Form (dimensiones + counter cajas) ========== */
+.luces-controls .form-rows {
+  padding: 8px 16px 14px;
+}
+.luces-controls .form-row {
+  display: grid; grid-template-columns: 140px 1fr; align-items: center; gap: 10px;
+  margin: 6px 0;
+}
+.luces-controls .form-row label {
+  font-family: var(--mono); font-size: 11px;
+  text-transform: uppercase; letter-spacing: .06em; color: var(--muted);
+}
+.luces-controls .form-row input {
+  width: 110px; font-family: var(--mono); font-size: 13px;
+  padding: 7px 9px; border: 1px solid #c8cfd6; border-radius: 6px;
+}
+.luces-controls .form-row.info-row {
+  border-top: 1px dashed #e4e8ec; padding-top: 8px; margin-top: 4px;
+}
+.luces-controls .info-lbl {
+  font-family: var(--mono); font-size: 11px;
+  text-transform: uppercase; letter-spacing: .06em; color: var(--muted);
+}
+.luces-controls .info-val {
+  font-family: var(--mono); font-size: 14px; font-weight: 700; color: var(--gold-d);
+}
+
+.use-pisos-btn {
+  margin: 0 16px 6px; font-size: 11.5px;
+}
+
+/* Caja config card */
+.box-config-card { padding: 12px 16px 14px; }
+.box-config-card h3 { margin: 0 0 4px; }
+.box-config-meta {
+  margin: 0 0 8px; font-family: var(--mono); font-size: 11px;
+  color: var(--muted); display: flex; flex-wrap: wrap; gap: 4px;
+}
+.box-counter {
+  display: flex; align-items: center; gap: 6px; margin-bottom: 6px;
+}
+.box-counter input {
+  width: 64px; font-family: var(--mono); font-size: 16px; font-weight: 700;
+  text-align: center; padding: 6px; border: 1px solid #c8cfd6; border-radius: 6px;
+}
+.box-counter .btn { padding: 6px 10px; font-size: 14px; }
+.box-subtotal {
+  margin-left: auto; font-family: var(--mono); font-size: 14px; font-weight: 700;
+  color: var(--ink);
+}
+.box-reco {
+  margin: 4px 0 0; font-size: 11.5px; color: var(--muted);
+}
+.box-reco.matches { color: var(--ok); font-weight: 600; }
+.box-reco strong { color: var(--gold-d); }
+.btn-link {
+  background: none; border: none; padding: 0; cursor: pointer;
+  color: var(--gold-d); font-weight: 600; text-decoration: underline;
+  font-family: inherit; font-size: inherit;
+}
+.btn-link:hover { color: var(--gold); }
+
+/* ========== Step nav ========== */
+.step-nav {
+  display: flex; gap: 10px; justify-content: flex-end;
+  padding: 14px 16px; border-top: 1px solid #eef1f4;
+}
+.step-nav.inline { padding: 0; border: none; }
+
+/* ========== Resumen ========== */
+.luces-resumen { margin-top: 22px; }
+.resumen-spec {
+  padding: 16px 20px;
+  font-family: var(--mono); font-size: 12px;
+}
+.resumen-spec .row {
+  display: flex; justify-content: space-between;
+  padding: 6px 0; border-bottom: 1px solid #eef1f4; gap: 12px;
+}
+.resumen-spec .row .k { color: var(--muted); }
+.resumen-spec .row .v { font-weight: 600; text-align: right; }
+.resumen-total {
+  display: flex; flex-wrap: wrap; align-items: baseline;
+  gap: 12px; padding: 16px 20px;
+  border-top: 2px solid var(--ink);
+  background: #fafbfc;
+}
+.resumen-total .lbl {
+  font-family: var(--mono); font-size: 10px;
+  letter-spacing: .14em; text-transform: uppercase; color: var(--muted);
+}
+.resumen-total .amt {
+  font-family: var(--mono); font-size: 28px; font-weight: 700;
+  color: var(--gold-d); margin-right: auto;
+}
+.resumen-total .hint { font-size: 11.5px; color: var(--muted); }

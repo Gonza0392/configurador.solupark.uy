@@ -1,0 +1,24 @@
+:root {
+  --ink: #14161b;
+  --steel-900: #15171c;
+  --steel-800: #1d2026;
+  --steel-700: #262a31;
+  --line: #363c45;
+  --line-soft: #454c56;
+  --paper: #e8eaed;
+  --card: #fff;
+  --silver: #aeb6c0;
+  --silver-d: #868f9b;
+  --silver-l: #cdd3da;
+  --gold: #d99327;
+  --gold-d: #b3751a;
+  --gold-soft: #fbeed6;
+  --ok: #2f9466;
+  --ok-soft: #dcefe6;
+  --warn: #ec5a23;
+  --warn-soft: #fbe3d8;
+  --muted: #6f7884;
+  --muted-l: #9aa2ad;
+  --sans: -apple-system, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  --mono: ui-monospace, "SF Mono", "Menlo", "Consolas", "Liberation Mono", monospace;
+}

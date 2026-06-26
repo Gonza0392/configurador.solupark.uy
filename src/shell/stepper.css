@@ -1,0 +1,21 @@
+.stepper {
+  list-style: none; display: flex; flex-wrap: wrap; gap: 6px;
+  padding: 0; margin: 22px 0 12px;
+}
+.stepper li button {
+  display: flex; align-items: center; gap: 8px;
+  padding: 8px 12px; border: 1px solid #cfd5db; background: #fff;
+  border-radius: 999px; font-family: var(--sans); font-size: 12px;
+  cursor: pointer; color: var(--muted);
+}
+.stepper li.done button { color: var(--ink); border-color: #b8c0c9; }
+.stepper li.on button {
+  background: var(--gold); border-color: var(--gold);
+  color: #1b1205; font-weight: 700;
+}
+.stepper li button:focus-visible { outline: 2px solid var(--gold); outline-offset: 2px; }
+.stepper .n {
+  font-family: var(--mono); font-size: 11px;
+  background: rgba(0, 0, 0, .08); padding: 2px 6px; border-radius: 999px;
+}
+.stepper li.on .n { background: rgba(255, 255, 255, .5); }
