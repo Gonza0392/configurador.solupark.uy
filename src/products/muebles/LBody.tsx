@@ -42,12 +42,14 @@ export function LBody({ state, setState }: Props) {
       return { [k]: L[k].filter((_, j) => j !== i) } as Partial<LState>
     })
 
-  const move = (side: Side, i: number, dir: -1 | 1) =>
+  const reorder = (side: Side) => (from: number, to: number) =>
     updateL((L) => {
+      if (from === to) return {}
       const k = itemsKey(side)
-      const arr = [...L[k]]; const j = i + dir
-      if (j < 0 || j >= arr.length) return {}
-      ;[arr[i], arr[j]] = [arr[j], arr[i]]
+      const arr = [...L[k]]
+      if (from < 0 || from >= arr.length || to < 0 || to >= arr.length) return {}
+      const [it] = arr.splice(from, 1)
+      arr.splice(to, 0, it)
       return { [k]: arr } as Partial<LState>
     })
 
@@ -81,7 +83,6 @@ export function LBody({ state, setState }: Props) {
           ...s.overlays,
           top:   subs.has('top')   || s.overlays.top,
           peg:   subs.has('peg')   || s.overlays.peg,
-          led:   subs.has('led')   || s.overlays.led,
           upper: subs.has('upper') || s.overlays.upper,
         },
       }
@@ -99,9 +100,7 @@ export function LBody({ state, setState }: Props) {
         <span key={i} className="chip">
           <span className="c">{sku}</span>
           <span>{m?.name ?? sku}</span>
-          <button type="button" onClick={() => move(side, i, -1)} title="Mover atrás"    aria-label="Mover atrás">‹</button>
-          <button type="button" onClick={() => move(side, i, +1)} title="Mover adelante" aria-label="Mover adelante">›</button>
-          <button type="button" onClick={() => removeAt(side, i)} title="Quitar"          aria-label="Quitar">×</button>
+          <button type="button" onClick={() => removeAt(side, i)} title="Quitar" aria-label="Quitar">×</button>
         </span>
       )
     })
@@ -147,41 +146,41 @@ export function LBody({ state, setState }: Props) {
 
         <div className="cat">
           <h3>Esquinero (el codo)</h3>
-          <div className="ov">
-            <label>
+          <label className="ov">
+            <div>
               <span>Incluir esquinero</span>
               <small>{fam.corner!.base} + tapa {fam.corner!.cover}</small>
-            </label>
+            </div>
             <span className="sw">
               <input type="checkbox" checked={L.corner} onChange={toggleCorner} aria-label="Incluir esquinero" />
               <span></span>
             </span>
-          </div>
-          <div className="ov">
-            <label>
+          </label>
+          <label className="ov">
+            <div>
               <span>Mueble alto en esquina</span>
               <small>{fam.corner!.upper}</small>
-            </label>
+            </div>
             <span className="sw">
               <input type="checkbox" checked={L.cornerUpper} onChange={toggleCornerUpper} aria-label="Mueble alto en esquina" />
               <span></span>
             </span>
-          </div>
+          </label>
         </div>
 
         <div className="cat">
           <h3>Capas (auto, ambos lados)</h3>
           {fam.overlays.map((slot) => (
-            <div key={slot.key} className="ov">
-              <label>
+            <label key={slot.key} className="ov">
+              <div>
                 <span>{slot.label}</span>
                 <small>{slot.sku} · auto</small>
-              </label>
+              </div>
               <span className="sw">
                 <input type="checkbox" checked={state.overlays[slot.key]} onChange={() => toggleOverlay(slot.key)} aria-label={slot.label} />
                 <span></span>
               </span>
-            </div>
+            </label>
           ))}
         </div>
 
@@ -238,6 +237,7 @@ export function LBody({ state, setState }: Props) {
           sideLabel={`Lado ${elevTab}`}
           maxScale={0.13}
           patternId={`pgL${elevTab}`}
+          onReorder={reorder(elevTab)}
         />
 
         <div className="run-wrap">
