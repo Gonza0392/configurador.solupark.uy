@@ -26,14 +26,13 @@ export function BOM({ calc, onPriceChange, onQuote, onClear }: Props) {
               <th>Código</th>
               <th>Descripción</th>
               <th className="r">Cant.</th>
-              <th className="r">N.W. (kg)</th>
               <th className="r">Precio venta US$</th>
               <th className="r">Subtotal</th>
             </tr>
           </thead>
           <tbody>
             {calc.bom.length === 0 ? (
-              <tr><td colSpan={6} className="bom-empty">Agregá módulos para ver la lista.</td></tr>
+              <tr><td colSpan={5} className="bom-empty">Agregá módulos para ver la lista.</td></tr>
             ) : calc.bom.map((b) => (
               <tr key={b.sku}>
                 <td><span className="code">{b.sku}</span></td>
@@ -42,7 +41,6 @@ export function BOM({ calc, onPriceChange, onQuote, onClear }: Props) {
                   {b.tag && <span className="tag"> {b.tag}</span>}
                 </td>
                 <td className="r qty">×{b.qty}</td>
-                <td className="r"><span className="code">{(b.nwKg * b.qty).toFixed(1)}</span></td>
                 <td className="r">
                   <input
                     className="pin" type="number" min={0} step={1}
@@ -57,19 +55,41 @@ export function BOM({ calc, onPriceChange, onQuote, onClear }: Props) {
           </tbody>
           {calc.bom.length > 0 && (
             <tfoot>
-              <tr>
-                <td colSpan={3}>Totales</td>
-                <td className="r"><span className="code" style={{ fontWeight: 700 }}>{calc.totalNwKg.toFixed(0)} kg</span></td>
-                <td></td>
-                <td className="tot">{moneyUsd(calc.totalPriceUsd)}</td>
+              <tr className="subtotal">
+                <td colSpan={4}>Subtotal</td>
+                <td className="r amt">{moneyUsd(calc.totalPriceUsd)}</td>
+              </tr>
+              <tr className="iva">
+                <td colSpan={4} className="lbl">+ IVA 22% <small>(sobre subtotal)</small></td>
+                <td className="r amt">{moneyUsd(calc.totalPriceUsd * 0.22)}</td>
+              </tr>
+              <tr className="total">
+                <td colSpan={4}>Total final</td>
+                <td className="r amt">{moneyUsd(calc.totalPriceUsd * 1.22)}</td>
               </tr>
             </tfoot>
           )}
         </table>
       </div>
+
+      {calc.bom.length > 0 && (
+        <div className="bom-logistics" aria-label="Datos logísticos para uso interno">
+          <span className="bom-logistics-lbl">Logística (uso interno)</span>
+          <span className="bom-logistics-chip">
+            <span className="b">{calc.totalNwKg.toFixed(0)}</span> kg
+          </span>
+          <span className="bom-logistics-chip">
+            <span className="b">{calc.totalCbm.toFixed(2)}</span> CBM
+          </span>
+          <span className="bom-logistics-chip">
+            <span className="b">{calc.bom.reduce((s, b) => s + b.qty, 0)}</span> bultos
+          </span>
+        </div>
+      )}
+
       <p className="bom-note">
-        <b>Precios de venta editables.</b> Cargá el precio al cliente por ítem y el total se recalcula.
-        El detalle por WhatsApp no incluye precios — modelo "Consulte por precio".
+        <b>Precios + IVA (22%).</b> Cargá el precio al cliente por ítem (sin IVA) y el sistema
+        calcula el IVA y total automáticamente.
       </p>
     </div>
   )

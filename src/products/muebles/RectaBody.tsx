@@ -26,11 +26,13 @@ export function RectaBody({ state, setState }: Props) {
   const setAvail = (v: number) => updateRecta({ availMm: Math.max(0, v) })
   const addItem  = (sku: string) => updateRecta((r) => ({ items: [...r.items, sku] }))
   const removeAt = (i: number) => updateRecta((r) => ({ items: r.items.filter((_, j) => j !== i) }))
-  const move = (i: number, dir: -1 | 1) =>
+  const reorder = (from: number, to: number) =>
     updateRecta((r) => {
-      const arr = [...r.items]; const j = i + dir
-      if (j < 0 || j >= arr.length) return {}
-      ;[arr[i], arr[j]] = [arr[j], arr[i]]
+      if (from === to) return {}
+      const arr = [...r.items]
+      if (from < 0 || from >= arr.length || to < 0 || to >= arr.length) return {}
+      const [it] = arr.splice(from, 1)
+      arr.splice(to, 0, it)
       return { items: arr }
     })
   const toggleOverlay = (key: OverlayKey) =>
@@ -52,7 +54,6 @@ export function RectaBody({ state, setState }: Props) {
         ...s.overlays,
         top:   subs.has('top')   || s.overlays.top,
         peg:   subs.has('peg')   || s.overlays.peg,
-        led:   subs.has('led')   || s.overlays.led,
         upper: subs.has('upper') || s.overlays.upper,
       },
     }))
@@ -88,7 +89,12 @@ export function RectaBody({ state, setState }: Props) {
           )}
         </div>
 
-        <ElevationSVG items={current.items} availMm={current.availMm} overlays={state.overlays} />
+        <ElevationSVG
+          items={current.items}
+          availMm={current.availMm}
+          overlays={state.overlays}
+          onReorder={reorder}
+        />
 
         <div className="run">
           {current.items.length === 0 ? (
@@ -99,9 +105,7 @@ export function RectaBody({ state, setState }: Props) {
               <span key={i} className="chip">
                 <span className="c">{sku}</span>
                 <span>{m?.name ?? sku}</span>
-                <button type="button" onClick={() => move(i, -1)} title="Mover a la izquierda" aria-label="Mover a la izquierda">‹</button>
-                <button type="button" onClick={() => move(i, +1)} title="Mover a la derecha"   aria-label="Mover a la derecha">›</button>
-                <button type="button" onClick={() => removeAt(i)} title="Quitar"               aria-label="Quitar">×</button>
+                <button type="button" onClick={() => removeAt(i)} title="Quitar" aria-label="Quitar">×</button>
               </span>
             )
           })}

@@ -42,11 +42,11 @@ export function Palette({ family, overlays, onAdd, onToggleOverlay }: Props) {
       <div className="cat">
         <h3>Capas (se distribuyen solas)</h3>
         {family.overlays.map((slot) => (
-          <div key={slot.key} className="ov">
-            <label>
+          <label key={slot.key} className="ov">
+            <div>
               <span>{slot.label}</span>
               <small>{slot.sku} · auto</small>
-            </label>
+            </div>
             <span className="sw">
               <input
                 type="checkbox"
@@ -56,7 +56,7 @@ export function Palette({ family, overlays, onAdd, onToggleOverlay }: Props) {
               />
               <span></span>
             </span>
-          </div>
+          </label>
         ))}
       </div>
     </aside>

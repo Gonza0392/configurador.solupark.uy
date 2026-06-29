@@ -17,6 +17,8 @@ export type SubType =
   | 'tower' | 'drawer' | 'door'
   | 'top' | 'peg' | 'led' | 'upper'
   | 'corner' | 'panel' | 'other'
+  | 'mobile'   // GLG6012 — móvil, no se conecta a vecinos ni soporta working top
+  | 'connector'  // GLG6008 — connectors (consumible, no overlay visual)
 
 export type Klass = 'columna' | 'overlay' | 'esquina'
 
@@ -30,6 +32,10 @@ export type Modulo = {
   sub: SubType
   /** Medidas del producto (mm). */
   W: number; D: number; H: number
+  /** Ancho efectivo en la pared (mm). Default = W. El móvil GLG6012 mide W=658
+   *  físico pero ocupa Weff=680mm en el layout (lo determina el upper + panel
+   *  que van encima). Visual: imagen centrada en su slot. */
+  Weff?: number
   /** Medidas del embalaje (mm). */
   eW: number; eD: number; eH: number
   /** Peso neto / bruto (kg). */
@@ -38,7 +44,11 @@ export type Modulo = {
   role: string
 }
 
-export type OverlayKey = 'top' | 'peg' | 'led' | 'upper'
+/** Ancho efectivo del módulo en la pared (mm). Para el móvil GLG6012 = 680 (no 658). */
+export const effW = (m: Modulo): number => m.Weff ?? m.W
+
+export type OverlayKey = 'top' | 'peg' | 'upper'
+// NOTE: 'led' eliminado — la luz LED viene integrada al módulo superior (GLG6001).
 
 export type OverlaySlot = {
   key: OverlayKey
@@ -67,20 +77,21 @@ export type Family = {
 // ===== Tabla de módulos ===============================================================
 
 export const MODULOS: Record<string, Modulo> = {
-  // ---- GLG6000 (pared recta) ----
-  'GLG6001': { sku:'GLG6001', name:'Módulo superior',       family:'GLG6000', klass:'overlay', sub:'upper', W:680,  D:281,  H:350,  eW:745,  eD:350, eH:430,  nw:10.5, gw:12.5, role:'Modulo superior' },
-  'GLG6002': { sku:'GLG6002', name:'Torre alta angosta',    family:'GLG6000', klass:'columna', sub:'tower', W:600,  D:460,  H:2000, eW:665,  eD:540, eH:2020, nw:52,   gw:58,   role:'Torre alta angosta' },
-  'GLG6003': { sku:'GLG6003', name:'Base con puertas',      family:'GLG6000', klass:'columna', sub:'door',  W:680,  D:460,  H:910,  eW:745,  eD:525, eH:945,  nw:27.5, gw:31,   role:'Base con puertas' },
-  'GLG6004': { sku:'GLG6004', name:'Base 4 cajones',        family:'GLG6000', klass:'columna', sub:'drawer',W:680,  D:460,  H:910,  eW:745,  eD:525, eH:945,  nw:47.2, gw:51,   role:'Base con cajones' },
-  'GLG6005': { sku:'GLG6005', name:'Base 6 cajones',        family:'GLG6000', klass:'columna', sub:'drawer',W:680,  D:460,  H:910,  eW:745,  eD:525, eH:945,  nw:48.5, gw:52,   role:'Base con cajones' },
-  'GLG6006': { sku:'GLG6006', name:'Mesada',                family:'GLG6000', klass:'overlay', sub:'top',   W:1052, D:605,  H:28,   eW:1090, eD:635, eH:55,   nw:6.2,  gw:8.1,  role:'Mesada' },
-  'GLG6007': { sku:'GLG6007', name:'Mesada (var.)',         family:'GLG6000', klass:'overlay', sub:'top',   W:1052, D:605,  H:28,   eW:1090, eD:635, eH:55,   nw:5.7,  gw:7.6,  role:'Mesada' },
-  'GLG6008': { sku:'GLG6008', name:'Barra LED',             family:'GLG6000', klass:'overlay', sub:'led',   W:1420, D:50.5, H:30,   eW:1460, eD:90,  eH:50,   nw:3.4,  gw:3.8,  role:'Barra/riel (luz)' },
-  'GLG6009': { sku:'GLG6009', name:'Panel perforado',       family:'GLG6000', klass:'overlay', sub:'peg',   W:1362, D:467,  H:36,   eW:1410, eD:495, eH:60,   nw:8.9,  gw:10,   role:'Panel perforado' },
-  'GLG6010': { sku:'GLG6010', name:'Panel perforado ancho', family:'GLG6000', klass:'overlay', sub:'peg',   W:2043, D:467,  H:36,   eW:2090, eD:495, eH:60,   nw:13.2, gw:15,   role:'Panel perforado ancho' },
-  'GLG6011': { sku:'GLG6011', name:'Base cajones',          family:'GLG6000', klass:'columna', sub:'drawer',W:680,  D:460,  H:910,  eW:745,  eD:525, eH:945,  nw:35.4, gw:39,   role:'Base con cajones' },
-  'GLG6012': { sku:'GLG6012', name:'Cajonera',              family:'GLG6000', klass:'columna', sub:'drawer',W:658,  D:460,  H:895,  eW:725,  eD:525, eH:815,  nw:48,   gw:51.5, role:'Cajonera' },
-  'GLG6013': { sku:'GLG6013', name:'Torre alta',            family:'GLG6000', klass:'columna', sub:'tower', W:915,  D:460,  H:2000, eW:980,  eD:535, eH:2020, nw:77.5, gw:85.5, role:'Torre alta' },
+  // ---- GLG6000 (pared recta) — datos corregidos según hoja oficial Goldenline
+  //   (file:GLG6000A wholesale 1250.xlsx) + precios de venta SoluPark.
+  'GLG6001': { sku:'GLG6001', name:'Módulo superior con LED',   family:'GLG6000', klass:'overlay', sub:'upper',     W:680,  D:281,  H:350,  eW:745,  eD:350, eH:430,  nw:10.5, gw:12.5, role:'Hanging wall cabinet with LED' },
+  'GLG6002': { sku:'GLG6002', name:'Torre alta angosta',         family:'GLG6000', klass:'columna', sub:'tower',     W:600,  D:460,  H:2000, eW:665,  eD:540, eH:2020, nw:52,   gw:58,   role:'1-Door tall cabinet' },
+  'GLG6003': { sku:'GLG6003', name:'Base con puertas',           family:'GLG6000', klass:'columna', sub:'door',      W:680,  D:460,  H:910,  eW:745,  eD:525, eH:945,  nw:27.5, gw:31,   role:'2-Door base cabinet' },
+  'GLG6004': { sku:'GLG6004', name:'Base 4 cajones',             family:'GLG6000', klass:'columna', sub:'drawer',    W:680,  D:460,  H:910,  eW:745,  eD:525, eH:945,  nw:47.2, gw:51,   role:'4-Drawer base cabinet' },
+  'GLG6005': { sku:'GLG6005', name:'Base 5 cajones',             family:'GLG6000', klass:'columna', sub:'drawer',    W:680,  D:460,  H:910,  eW:745,  eD:525, eH:945,  nw:48.5, gw:52,   role:'5-Drawer base cabinet' },
+  'GLG6006': { sku:'GLG6006', name:'Panel perforado con enchufe', family:'GLG6000', klass:'overlay', sub:'peg',      W:1052, D:605,  H:28,   eW:1090, eD:635, eH:55,   nw:6.2,  gw:8.1,  role:'Hanging panel with Europe standard socket' },
+  'GLG6007': { sku:'GLG6007', name:'Panel perforado',            family:'GLG6000', klass:'overlay', sub:'peg',       W:1052, D:605,  H:28,   eW:1090, eD:635, eH:55,   nw:5.7,  gw:7.6,  role:'Hanging panel' },
+  'GLG6008': { sku:'GLG6008', name:'Conectores entre módulos (pack 5)', family:'GLG6000', klass:'overlay', sub:'connector', W:1420, D:50.5, H:30, eW:1460, eD:90, eH:50, nw:3.4, gw:3.8, role:'Cabinet connectors' },
+  'GLG6009': { sku:'GLG6009', name:'Working top stainless 2-mod', family:'GLG6000', klass:'overlay', sub:'top',      W:1362, D:467,  H:36,   eW:1410, eD:495, eH:60,   nw:8.9,  gw:10,   role:'Stainless steel working top (2-mod)' },
+  'GLG6010': { sku:'GLG6010', name:'Working top stainless 3-mod', family:'GLG6000', klass:'overlay', sub:'top',      W:2043, D:467,  H:36,   eW:2090, eD:495, eH:60,   nw:13.2, gw:15,   role:'Stainless steel working top (3-mod)' },
+  'GLG6011': { sku:'GLG6011', name:'Base con cubo de basura',    family:'GLG6000', klass:'columna', sub:'door',      W:680,  D:460,  H:910,  eW:745,  eD:525, eH:945,  nw:35.4, gw:39,   role:'Garbage bin base cabinet' },
+  'GLG6012': { sku:'GLG6012', name:'Cajonera móvil (con wood top integrado)', family:'GLG6000', klass:'columna', sub:'mobile', W:658, Weff:680, D:460, H:895, eW:725, eD:525, eH:815, nw:48, gw:51.5, role:'5-Drawer roller cabinet with wood top' },
+  'GLG6013': { sku:'GLG6013', name:'Torre alta',                 family:'GLG6000', klass:'columna', sub:'tower',     W:915,  D:460,  H:2000, eW:980,  eD:535, eH:2020, nw:77.5, gw:85.5, role:'2-Door tall cabinet' },
 
   // ---- GLG7000 (en L) ----
   'GLG7001': { sku:'GLG7001', name:'Módulo superior',       family:'GLG7000', klass:'overlay', sub:'upper', W:680,  D:281,  H:350,  eW:745,  eD:350, eH:430,  nw:10.5, gw:12.5, role:'Modulo superior' },
@@ -125,10 +136,13 @@ export const FAMILIES: Family[] = [
     label: 'GLG6000 · pared recta',
     columns: ['GLG6013', 'GLG6002', 'GLG6003', 'GLG6004', 'GLG6005', 'GLG6011', 'GLG6012'],
     overlays: [
-      { key: 'top',   label: 'Mesada',             sku: 'GLG6006' },
-      { key: 'peg',   label: 'Panel perforado',    sku: 'GLG6009' },
-      { key: 'led',   label: 'Barra LED',          sku: 'GLG6008' },
-      { key: 'upper', label: 'Módulos superiores', sku: 'GLG6001' },
+      // 'top' = working top stainless steel. Se calcula con packing 2-mod (GLG6009) + 3-mod (GLG6010).
+      // El `sku` acá es nominal — el calc decide la combinación real.
+      { key: 'top',   label: 'Working top stainless',  sku: 'GLG6009' },
+      // 'peg' = panel perforado. Default GLG6007 (sin enchufe, más barato). GLG6006 es la variante con enchufe.
+      { key: 'peg',   label: 'Panel perforado',        sku: 'GLG6007' },
+      // 'upper' = módulo superior CON LED integrado. (Antes existía un overlay 'led' separado — eliminado.)
+      { key: 'upper', label: 'Módulos superiores LED', sku: 'GLG6001' },
     ],
   },
   {
@@ -138,7 +152,6 @@ export const FAMILIES: Family[] = [
     overlays: [
       { key: 'top',   label: 'Mesada',             sku: 'GLG7006' },
       { key: 'peg',   label: 'Panel perforado',    sku: 'GLG7009' },
-      { key: 'led',   label: 'Barra LED',          sku: 'GLG7008' },
       { key: 'upper', label: 'Módulos superiores', sku: 'GLG7001' },
     ],
     corner: {
@@ -155,7 +168,6 @@ export const FAMILIES: Family[] = [
     overlays: [
       { key: 'top',   label: 'Mesada',             sku: 'GLG8006' },
       { key: 'peg',   label: 'Panel perforado',    sku: 'GLG8010' },
-      { key: 'led',   label: 'Barra LED',          sku: 'GLG8008' },
       { key: 'upper', label: 'Módulos superiores', sku: 'GLG8001' },
     ],
     hidden: true,
