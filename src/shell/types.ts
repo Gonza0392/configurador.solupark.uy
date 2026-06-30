@@ -10,6 +10,10 @@ export type BomLine = {
   nwKg: number
   /** Precio de venta unitario actual (US$). Editable desde el BOM del shell. */
   priceUsd: number
+  /** Componentes del pack (info logística para separación de pedido y entrega).
+   *  Aparece como detalle pequeño debajo del nombre. No cobra extra: el precio
+   *  ya incluye todos los componentes. */
+  components?: Array<{ sku: string; qty: number; name: string }>
 }
 
 export type Metric = {

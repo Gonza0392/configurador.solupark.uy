@@ -40,6 +40,21 @@
 .bom-note { font-size: 11.5px; color: var(--muted); padding: 10px 15px; border-top: 1px solid #eef1f4; line-height: 1.5; }
 .bom-note b { color: var(--gold-d); }
 
+.bom-components {
+  margin-top: 4px;
+  display: flex; flex-wrap: wrap; gap: 4px 8px; align-items: baseline;
+  font-size: 10.5px;
+}
+.bom-components-lbl {
+  font-family: var(--mono); font-size: 9.5px; color: var(--muted-l);
+  text-transform: uppercase; letter-spacing: 0.4px;
+}
+.bom-components-item {
+  display: inline-flex; align-items: baseline; gap: 3px;
+  color: var(--muted);
+}
+.bom-components-item .code { font-size: 10px; color: var(--muted); }
+
 .bom-logistics {
   display: flex; align-items: center; flex-wrap: wrap; gap: 8px;
   padding: 10px 15px; border-top: 1px solid #eef1f4;

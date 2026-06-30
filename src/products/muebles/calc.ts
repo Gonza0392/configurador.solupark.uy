@@ -250,11 +250,19 @@ ${bomLines}${warnLine}`
 //   - El corner NO entra en el cálculo de overlays de cada lado (ya viene
 //     "armado" en el pack GLG7000D).
 
+/** Profundidad del mueble GLG6xxx (mm). Cuando no hay esquinero, el sistema
+ *  reserva este hueco en la esquina para que los módulos del lado A y del
+ *  lado B no se choquen físicamente al cerrar el ángulo de la pared. */
+const SIDE_DEPTH_MM = 460
+
 export function calcL(state: MueblesState): CalcResult {
   const fam = familyById('GLG7000')
   const L = state.L
   const corner = fam.corner!
-  const cornerW = L.corner ? MODULOS[corner.base].W : 0    // 810mm físico de la huella
+  // Espacio reservado en la esquina:
+  //   - Con esquinero GLG7000D: 810mm (huella del corner)
+  //   - Sin esquinero: 460mm (hueco mínimo para evitar choque entre lados)
+  const cornerW = L.corner ? MODULOS[corner.base].W : SIDE_DEPTH_MM
 
   // Suma de anchos efectivos por lado (móvil cuenta como 680mm, no 658).
   const sumEffW = (items: string[]) =>
@@ -271,13 +279,13 @@ export function calcL(state: MueblesState): CalcResult {
   // 1) Columnas (bases/torres/móviles) de los dos lados
   for (const sku of [...L.itemsA, ...L.itemsB]) add(sku)
 
-  // 2) Pack GLG7000D — fijo cuando el corner está activo
+  // 2) Pack GLG7000D — UN solo SKU en el BOM cuando el corner está activo.
+  //    Los 5 componentes (7016+7015+7014+7020 + 2× GLG6008) NO se cuentan
+  //    individualmente; viajan como detalle logístico en BomLine.components.
+  //    Precio = USD 650 (FOB 279) — info del proveedor, no por componente.
+  const SKU_CORNER_PACK = 'GLG7000D'
   if (L.corner) {
-    add(corner.base)        // GLG7016
-    add(corner.cover)       // GLG7015
-    add(corner.upper)       // GLG7014
-    add(corner.cornerTop)   // GLG7020
-    add(SKU_CONNECTORS, 2)  // 2 packs GLG6008 (= 2× barra GLG7008 del pack)
+    add(SKU_CORNER_PACK)
   }
 
   // 3) Overlays por lado — misma lógica que calcRecta, aplicada a cada lado.
@@ -327,8 +335,16 @@ export function calcL(state: MueblesState): CalcResult {
   const hasAnything = L.itemsA.length > 0 || L.itemsB.length > 0 || L.corner
   const isValid = hasAnything
 
-  const cornerOrder = [corner.base, corner.cover, corner.upper, corner.cornerTop]
-  const order = [...fam.columns, ...cornerOrder,
+  // Componentes del pack GLG7000D — info logística (no facturada por separado)
+  const cornerPackComponents = [
+    { sku: corner.base,      qty: 1, name: MODULOS[corner.base].name },       // GLG7016
+    { sku: corner.cover,     qty: 1, name: MODULOS[corner.cover].name },      // GLG7015
+    { sku: corner.upper,     qty: 1, name: MODULOS[corner.upper].name },      // GLG7014
+    { sku: corner.cornerTop, qty: 1, name: MODULOS[corner.cornerTop].name },  // GLG7020
+    { sku: SKU_CONNECTORS,   qty: 2, name: MODULOS[SKU_CONNECTORS].name },    // GLG6008 × 2
+  ]
+
+  const order = [...fam.columns, SKU_CORNER_PACK,
                  SKU_WORKING_TOP_2, SKU_WORKING_TOP_3,
                  SKU_PEG_DEFAULT, 'GLG6006',
                  SKU_UPPER, SKU_CONNECTORS]
@@ -336,7 +352,9 @@ export function calcL(state: MueblesState): CalcResult {
   const bom: BomLine[] = Object.keys(counts).sort((a, b) => rank(a) - rank(b)).map((sku) => {
     const m = MODULOS[sku]!
     const tag = m.klass === 'overlay' ? 'capa' : m.klass === 'esquina' ? 'esquina' : undefined
-    return { sku, name: m.name, tag, qty: counts[sku], nwKg: m.nw, priceUsd: priceOf(state, sku) }
+    const line: BomLine = { sku, name: m.name, tag, qty: counts[sku], nwKg: m.nw, priceUsd: priceOf(state, sku) }
+    if (sku === SKU_CORNER_PACK) line.components = cornerPackComponents
+    return line
   })
 
   const aEmpty = L.itemsA.length === 0 && !L.corner
@@ -365,7 +383,7 @@ export function calcL(state: MueblesState): CalcResult {
     { k: 'Lado A',                  v: `${mm(widthA)}${fitA ? '' : ' (excede)'}` },
     { k: 'Lado B',                  v: `${mm(widthB)}${fitB ? '' : ' (excede)'}` },
     { k: 'Pared A / B disponibles', v: `${mm(L.availMmA)} / ${mm(L.availMmB)}` },
-    { k: 'Esquinero',               v: L.corner ? (L.cornerUpper ? 'Sí (con mueble alto)' : 'Sí') : 'No' },
+    { k: 'Esquinero GLG7000D',      v: L.corner ? 'Sí' : `No (hueco ${SIDE_DEPTH_MM}mm reservado)` },
     { k: 'N° de módulos',           v: bom.reduce((s, b) => s + b.qty, 0).toString() },
     { k: 'Peso neto / bruto',       v: `${nw.toFixed(0)} / ${gw.toFixed(0)} kg` },
     { k: 'Volumen',                 v: `${cbm.toFixed(2)} CBM` },
