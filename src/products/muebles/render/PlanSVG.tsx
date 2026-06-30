@@ -18,7 +18,9 @@ export function PlanSVG({ state }: { state: MueblesState }) {
   }, [])
 
   const L = state.L
-  const cornerW = L.corner ? 810 : 0
+  // Hueco mínimo de 460mm (profundidad del mueble) cuando no hay esquinero,
+  // para que los lados A y B no se choquen físicamente al cerrar el ángulo.
+  const cornerW = L.corner ? 810 : 460
   const lenA = cornerW + L.itemsA.reduce((s, sku) => s + (MODULOS[sku]?.W ?? 0), 0)
   const lenB = cornerW + L.itemsB.reduce((s, sku) => s + (MODULOS[sku]?.W ?? 0), 0)
   const extentX = Math.max(lenA, L.availMmA, 1200)
@@ -44,12 +46,22 @@ export function PlanSVG({ state }: { state: MueblesState }) {
   els.push(<rect key="wA" x={ox - wallTh} y={oy - wallTh} width={lenA * sc + wallTh} height={wallTh} fill="#3a4049" />)
   els.push(<rect key="wB" x={ox - wallTh} y={oy - wallTh} width={wallTh} height={lenB * sc + wallTh} fill="#3a4049" />)
 
-  // Esquinero (footprint)
+  // Esquinero (footprint) o hueco placeholder de 460×460mm
   if (L.corner) {
     els.push(
       <rect key="corner" x={ox} y={oy} width={810 * sc} height={810 * sc} fill={cornc} stroke={stk} />,
       <text key="corner-l" x={ox + 810 * sc / 2} y={oy + 810 * sc / 2 + 3}
         fontFamily="monospace" fontSize="8" fill="#5a4410" textAnchor="middle">7016</text>,
+    )
+  } else {
+    // Hueco 460×460mm — zona de exclusión para que los lados no se choquen
+    els.push(
+      <rect key="cornerGap" x={ox} y={oy} width={460 * sc} height={460 * sc}
+        fill="none" stroke="#a86a1c" strokeWidth={1} strokeDasharray="3 3" opacity={0.6} />,
+      <text key="cornerGap-l" x={ox + 460 * sc / 2} y={oy + 460 * sc / 2 - 2}
+        fontFamily="monospace" fontSize="7.5" fill="#a86a1c" textAnchor="middle">hueco</text>,
+      <text key="cornerGap-l2" x={ox + 460 * sc / 2} y={oy + 460 * sc / 2 + 7}
+        fontFamily="monospace" fontSize="7" fill="#a86a1c" textAnchor="middle">460×460</text>,
     )
   }
 

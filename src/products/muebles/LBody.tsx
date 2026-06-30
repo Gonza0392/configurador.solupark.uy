@@ -61,15 +61,13 @@ export function LBody({ state, setState }: Props) {
   const applyCombo = (composition: Array<{ sku: string; qty: number }>) => {
     const items: string[] = []
     let cornerOn = L.corner
-    let cornerUpperOn = L.cornerUpper
     for (const { sku, qty } of composition) {
       const m = MODULOS[sku]
-      if (!m || m.family !== 'GLG7000') continue
+      if (!m) continue
       if (m.klass === 'columna') {
         for (let i = 0; i < qty; i++) items.push(sku)
       } else if (m.klass === 'esquina') {
         cornerOn = true
-        if (sku === fam.corner!.upper) cornerUpperOn = true
       }
     }
     const subs = new Set(composition.map((c) => MODULOS[c.sku]?.sub).filter(Boolean) as string[])
@@ -77,7 +75,7 @@ export function LBody({ state, setState }: Props) {
       const k = itemsKey(s.target)
       return {
         ...s,
-        L: { ...s.L, [k]: items, corner: cornerOn, cornerUpper: cornerUpperOn },
+        L: { ...s.L, [k]: items, corner: cornerOn },
         overlays: {
           ...s.overlays,
           top:   subs.has('top')   || s.overlays.top,
@@ -223,6 +221,7 @@ export function LBody({ state, setState }: Props) {
           availMm={L[availKey(elevTab)]}
           overlays={state.overlays}
           cornerSku={L.corner ? fam.corner!.base : undefined}
+          cornerSpaceMm={L.corner ? undefined : 460}
           sideLabel={`Lado ${elevTab}`}
           maxScale={0.13}
           patternId={`pgL${elevTab}`}

@@ -20,6 +20,11 @@ type Props = {
   /** Si está presente, dibuja el esquinero base a la izquierda como primer bloque
    *  (caso L). El SKU debe ser el GLG7016 o equivalente. */
   cornerSku?: string
+  /** Espacio reservado en mm a la izquierda (antes del primer ítem). Útil para
+   *  modo L sin esquinero: deja un hueco placeholder (default 460mm = profundidad
+   *  del mueble) para evitar que módulos del lado A y B se choquen al cerrar
+   *  el ángulo. Si está set sin cornerSku → dibuja un placeholder visual. */
+  cornerSpaceMm?: number
   /** Etiqueta para la cota total (ej. "Lado A: NNNN mm"). Si se omite, solo va el número. */
   sideLabel?: string
   /** Escala máxima (px/mm). Default 0.24 para recta; ~0.13 para L que suele ser más angosta. */
@@ -37,7 +42,7 @@ type Props = {
  *   - Overlays pixel-alineados a las bases (sin gaps verticales). */
 export function ElevationSVG({
   items, availMm, overlays,
-  cornerSku, sideLabel,
+  cornerSku, cornerSpaceMm, sideLabel,
   maxScale = 0.24,
   patternId = 'pg',
   onReorder,
@@ -82,8 +87,12 @@ export function ElevationSVG({
   }, [])
 
   const corner = cornerSku ? MODULOS[cornerSku] : undefined
-  const cornerW = corner?.W ?? 0
+  // cornerW = espacio horizontal reservado a la izquierda. Con esquinero =
+  // ancho físico del 7016 (810mm). Sin esquinero pero con `cornerSpaceMm` =
+  // hueco placeholder (típicamente 460mm = profundidad de los módulos).
+  const cornerW = corner?.W ?? cornerSpaceMm ?? 0
   const cornerH = corner?.H ?? 0
+  const showCornerGap = !corner && cornerW > 0
 
   const itemsW = items.reduce((s, sku) => {
     const m = MODULOS[sku]
@@ -254,9 +263,10 @@ export function ElevationSVG({
   let xScan = pad.l
   // El corner GLG7000D es una unidad cerrada — sus paneles/uppers ya están
   // en el pack. Los overlays del lado NO deben cubrir su zona; salteo el
-  // ancho del corner y empiezo el run después.
-  if (corner) {
-    xScan += corner.W * sc
+  // ancho del corner y empiezo el run después. Idem si hay hueco placeholder
+  // (sin esquinero): los overlays del lado no deben invadir el hueco.
+  if (cornerW > 0) {
+    xScan += cornerW * sc
   }
   for (const sku of items) {
     const m = MODULOS[sku]
@@ -347,6 +357,28 @@ export function ElevationSVG({
     ]
     groups.push(<g key="corner">{parts}</g>)
     x += w
+  } else if (showCornerGap) {
+    // Hueco placeholder (modo L sin esquinero): zona vacía donde irían los
+    // muebles de la otra pared. Visual: rectángulo punteado con etiqueta
+    // "hueco 460mm" para aclarar que es espacio reservado, no un módulo.
+    const gW = cornerW * sc
+    const gParts: ReactNode[] = [
+      <rect key="ghole" x={x} y={baseTop} width={gW} height={ground - baseTop}
+        fill="none" stroke="#a86a1c" strokeWidth={0.8} strokeDasharray="3 3" opacity={0.6} />,
+      <text key="glbl" x={x + gW / 2} y={baseTop + (ground - baseTop) / 2 - 4}
+        fontFamily="monospace" fontSize="8" fill="#a86a1c" textAnchor="middle">
+        hueco
+      </text>,
+      <text key="glbl2" x={x + gW / 2} y={baseTop + (ground - baseTop) / 2 + 7}
+        fontFamily="monospace" fontSize="8" fill="#a86a1c" textAnchor="middle">
+        {cornerW}mm
+      </text>,
+      <text key="gw" x={x + gW / 2} y={ground + 14}
+        fontFamily="monospace" fontSize="9" fill="#5a6068" textAnchor="middle"
+        opacity={0.7}>{cornerW} sin esquinero</text>,
+    ]
+    groups.push(<g key="cornerGap">{gParts}</g>)
+    x += gW
   }
 
   // Items del lado — sin overlays individuales (ahora se dibujan por run).

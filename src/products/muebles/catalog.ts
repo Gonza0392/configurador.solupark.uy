@@ -115,6 +115,13 @@ export const MODULOS: Record<string, Modulo> = {
   'GLG7019': { sku:'GLG7019', name:'Base ancha',            family:'GLG7000', klass:'columna', sub:'door',  W:915,  D:460,  H:870,  eW:980,  eD:525, eH:945,  nw:36,   gw:39,   role:'Base' },
   'GLG7020': { sku:'GLG7020', name:'Mesada de esquina',     family:'GLG7000', klass:'esquina', sub:'corner',W:1052, D:732,  H:60,   eW:1080, eD:732, eH:75,   nw:15.5, gw:16.5, role:'Mesada (zona esquina)' },
 
+  // Pack completo GLG7000D — esquinero como unidad de venta. Incluye:
+  //   GLG7016 + GLG7015 + GLG7014 + GLG7020 + 2× GLG6008 (barras espaciadoras)
+  // El BOM lo muestra como UN solo ítem (precio + IVA). Los componentes
+  // se listan abajo como detalle logístico para separación de pedido.
+  // Valores agregados del pack según catálogo oficial: 90 kg, 1.2 CBM.
+  'GLG7000D':{ sku:'GLG7000D', name:'Esquinero (pack completo)',  family:'GLG7000', klass:'esquina', sub:'corner', W:810, D:810, H:2000, eW:1000, eD:600, eH:2000, nw:90, gw:90, role:'Esquinero pack (5 piezas)' },
+
   // ---- GLG8000 (recta, bases anchas/profundas — OCULTA hasta validar) ----
   'GLG8001': { sku:'GLG8001', name:'Módulo superior',       family:'GLG8000', klass:'overlay', sub:'upper', W:900,  D:281,  H:350,  eW:960,  eD:345, eH:430,  nw:13.6, gw:15.6, role:'Modulo superior' },
   'GLG8002': { sku:'GLG8002', name:'Módulo superior ancho', family:'GLG8000', klass:'overlay', sub:'upper', W:1800, D:281,  H:693,  eW:1860, eD:340, eH:770,  nw:32.6, gw:36,   role:'Modulo superior ancho' },

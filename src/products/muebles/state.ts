@@ -40,6 +40,9 @@ export const DEFAULT_SALE_PRICES: Record<string, number> = {
   GLG7012: 373,  // Cajonera (≈ GLG6012)
   GLG7013: 593,  // Torre alta (== GLG6013)
   GLG7019: 307,  // Base ancha (≈ GLG6011 ancho)
+
+  // Pack completo del esquinero (5 piezas en un solo SKU vendido)
+  GLG7000D: 650, // Esquinero pack (FOB USD 279, PVP USD 650 + IVA)
 }
 
 /** IVA Uruguay (tasa básica): 22%. Aplicado sobre el precio sin IVA. */
@@ -58,7 +61,6 @@ export type LState = {
   itemsA: string[]
   itemsB: string[]
   corner: boolean
-  cornerUpper: boolean
 }
 
 /** Estado del módulo Muebles.
@@ -95,7 +97,6 @@ export const initialMueblesState: MueblesState = {
     itemsA: [],
     itemsB: [],
     corner: true,
-    cornerUpper: false,
   },
   target: 'A',
   overlays: { top: true, peg: true, upper: false },

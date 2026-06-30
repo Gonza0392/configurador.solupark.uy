@@ -39,6 +39,16 @@ export function BOM({ calc, onPriceChange, onQuote, onClear }: Props) {
                 <td>
                   {b.name}
                   {b.tag && <span className="tag"> {b.tag}</span>}
+                  {b.components && b.components.length > 0 && (
+                    <div className="bom-components" aria-label="Componentes del pack (uso logístico)">
+                      <span className="bom-components-lbl">contiene:</span>
+                      {b.components.map((c, i) => (
+                        <span key={i} className="bom-components-item">
+                          <span className="code">{c.sku}</span>×{c.qty}
+                        </span>
+                      ))}
+                    </div>
+                  )}
                 </td>
                 <td className="r qty">×{b.qty}</td>
                 <td className="r">
