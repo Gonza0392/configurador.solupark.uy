@@ -9,3 +9,4 @@ _xlsx_dump
 
 # Claude Code — personal permission grants per machine
 .claude/settings.local.json
+.vite/
