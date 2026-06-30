@@ -252,9 +252,10 @@ export function ElevationSVG({
   let runStartX: number | null = null
   let runW = 0
   let xScan = pad.l
+  // El corner GLG7000D es una unidad cerrada — sus paneles/uppers ya están
+  // en el pack. Los overlays del lado NO deben cubrir su zona; salteo el
+  // ancho del corner y empiezo el run después.
   if (corner) {
-    runStartX = xScan
-    runW = corner.W * sc
     xScan += corner.W * sc
   }
   for (const sku of items) {
@@ -275,55 +276,74 @@ export function ElevationSVG({
   }
   if (runStartX !== null) overlayRuns.push({ startX: runStartX, totalW: runW })
 
-  // Esquinero GLG7000D (modo L): proyección frontal full-height (2000mm) con
-  //   base + panel perforado + upper LED, igual stack que las torres.
-  //   Intenta cargar imagen oficial /catalog/glg7000/GLG7000D.png; si no carga,
-  //   muestra fallback SVG en negro con detalles representativos.
+  // Esquinero GLG7000D (modo L): usa la PNG oficial del catálogo
+  //   /catalog/glg7000/GLG7000D.png — vista pseudo-isométrica 3/4.
+  //   Si la PNG no carga, el skeleton oscuro queda visible como fallback.
   if (corner) {
+    // SVG frontal estricto — usa las MISMAS alturas Y que las bases GLG6xxx
+    // para que la mesada (working top), panel perforado y upper queden
+    // perfectamente alineados con los módulos adyacentes del lado L.
+    // Estética coherente: cuerpo negro, manija plateada vertical estilo barra,
+    // working top stainless (mismo nivel y grosor que las bases),
+    // panel perforado con grilla de puntitos, upper con tira LED amarilla.
     const w = corner.W * sc
-    const cBase = 870 * sc            // GLG7016 base height
-    const cTopHat = 355 * sc          // GLG7014 upper height
-    const cTopY = ground - 2000 * sc  // full-height (alineado con torres)
-    const baseTopCorner = ground - cBase
+    const cx = x + w / 2
+    // Reutilizo las constantes globales del componente:
+    //   baseTop, wtTop, wtH*sc, pegTop, pegBot, upTop, upBot — mismas que bases.
+    const ledH = Math.max(2, 4 * sc)
+    // Color del cuerpo igualado al tono medio de las PNG de las bases (gris-azulado
+    // oscuro), no negro puro — evita que el corner se vea "más oscuro" que el resto.
+    const bodyFill = '#2a2e36'
+    const bodyStroke = '#15181d'
+    const barW = Math.max(3, 45 * sc)
     const parts: ReactNode[] = [
-      // Skeleton oscuro (visible si la PNG no carga)
-      <rect key="cbg" x={x} y={cTopY} width={w} height={ground - cTopY}
-        fill="#2a2e36" stroke={stk} strokeWidth={0.5} opacity={0.6} />,
-      // Cuerpo de la base inferior (puerta)
-      <rect key="cbody" x={x + 1} y={baseTopCorner} width={w - 2} height={cBase}
-        fill="#1a1c20" stroke="#0d1015" strokeWidth={0.5} />,
-      <line key="cdoor" x1={x + w / 2} y1={baseTopCorner + 3} x2={x + w / 2} y2={ground - 3}
-        stroke="#0d1015" strokeWidth={0.4} />,
-      // Manijas verticales en la puerta
-      <rect key="ch1" x={x + w / 2 - 2.5} y={baseTopCorner + cBase * 0.4} width={0.8} height={cBase * 0.3} fill="#9aa2ad" />,
-      <rect key="ch2" x={x + w / 2 + 1.7} y={baseTopCorner + cBase * 0.4} width={0.8} height={cBase * 0.3} fill="#9aa2ad" />,
-      // Working top + panel perforado (zona del medio)
-      <rect key="cwt" x={x} y={baseTopCorner - 30 * sc} width={w} height={30 * sc}
-        fill="#9aa2ad" stroke="#7a8088" strokeWidth={0.4} />,
-      <rect key="cpeg" x={x + 2} y={cTopY + cTopHat} width={w - 4} height={baseTopCorner - 30 * sc - (cTopY + cTopHat)}
-        fill="#1a1c20" stroke="#0d1015" strokeWidth={0.4} />,
-      // Patrón de perforaciones simulado
-      ...Array.from({ length: 12 }).flatMap((_, r) =>
-        Array.from({ length: 5 }).map((__, c) => (
-          <rect key={`cp${r}-${c}`}
-            x={x + 4 + c * ((w - 8) / 5)} y={cTopY + cTopHat + 4 + r * ((baseTopCorner - 30 * sc - (cTopY + cTopHat) - 8) / 12)}
-            width={1.2} height={1.2} fill="#9aa2ad" opacity={0.45} />
-        ))
-      ),
-      // Módulo superior (GLG7014/7015) — caja chata con LED
-      <rect key="cup" x={x + 1} y={cTopY} width={w - 2} height={cTopHat}
-        fill="#1a1c20" stroke="#0d1015" strokeWidth={0.5} />,
-      <line key="cupdoor" x1={x + w / 2} y1={cTopY + 2} x2={x + w / 2} y2={cTopY + cTopHat - 2}
-        stroke="#0d1015" strokeWidth={0.4} />,
-      <rect key="cled" x={x + 1} y={cTopY + cTopHat - Math.max(2, 4 * sc)} width={w - 2} height={Math.max(2, 4 * sc)}
-        fill="#ffe08a" stroke="#caa53a" strokeWidth={0.4} opacity={0.9} />,
-      // Etiqueta "ESQ" sutil
-      <text key="cl" x={x + w / 2} y={ground - cBase / 2 + 3}
-        fontFamily="monospace" fontSize="7.5" fill="#5a6068" textAnchor="middle"
-        opacity={0.6}>ESQ</text>,
-      // Etiqueta de ancho debajo
-      <text key="cw" x={x + w / 2} y={ground + 14}
-        fontFamily="monospace" fontSize="9.5" fill="#3a3f48" textAnchor="middle">{corner.W}</text>,
+      // ===== CUERPO BASE (cuerpo coherente con bases GLG6xxx) =====
+      <rect key="cbody" x={x} y={baseTop} width={w} height={ground - baseTop}
+        fill={bodyFill} stroke={bodyStroke} strokeWidth={0.5} />,
+      // Puerta única central con manija plateada vertical estilo barra
+      <rect key="cdoor" x={x + 4} y={baseTop + 4} width={w - 8} height={ground - baseTop - 8}
+        fill="none" stroke="#15181d" strokeWidth={0.5} />,
+      <rect key="cbh" x={x + w * 0.62} y={baseTop + (ground - baseTop) * 0.15}
+        width={1.5} height={(ground - baseTop) * 0.7}
+        fill="#9aa2ad" stroke="#7a8088" strokeWidth={0.3} rx={0.5} />,
+      // Patas / regatones (2 visibles, mismo estilo que bases)
+      <rect key="cfoot-L" x={x + 6} y={ground - 1} width={20} height={2} fill="#0a0c10" />,
+      <rect key="cfoot-R" x={x + w - 26} y={ground - 1} width={20} height={2} fill="#0a0c10" />,
+
+      // ===== WORKING TOP STAINLESS — MISMA Y, MISMO GROSOR que las bases =====
+      <rect key="cwt" x={x} y={wtTop} width={w} height={Math.max(2, 30 * sc)}
+        fill="#9aa2ad" stroke="#7a8088" strokeWidth={0.5} />,
+      <rect key="cwt-shine" x={x} y={wtTop} width={w} height={Math.max(1, 30 * sc * 0.35)}
+        fill="#fff" opacity={0.4} pointerEvents="none" />,
+
+      // ===== PANEL PERFORADO — IMAGE directa de GLG6007.png, altura completa
+      //       (wtTop - pegTop = 710mm, mismo approach que las bases — cubre
+      //       el panel + zona donde se ven solo las barras hasta el working top).
+      <rect key="cpeg-bg" x={x} y={pegTop} width={w} height={wtTop - pegTop}
+        fill={`url(#${patternId})`} opacity={0.25} />,
+      <image key="cpeg" href={`${IMAGE_BASE}GLG6007.png`}
+        x={x + barW} y={pegTop} width={w - 2 * barW} height={wtTop - pegTop}
+        preserveAspectRatio="none" pointerEvents="none" />,
+      // 2 barras espaciadoras laterales (mismas que en las bases — negro)
+      <rect key="cbarL" x={x} y={pegTop} width={barW} height={wtTop - pegTop}
+        fill="#1a1c20" stroke="#0a0b0d" strokeWidth={0.6} />,
+      <rect key="cbarR" x={x + w - barW} y={pegTop} width={barW} height={wtTop - pegTop}
+        fill="#1a1c20" stroke="#0a0b0d" strokeWidth={0.6} />,
+
+      // ===== UPPER LED — misma altura y tira LED que las bases (sin manija horizontal) =====
+      <rect key="cup" x={x} y={upTop} width={w} height={upBot - upTop}
+        fill={bodyFill} stroke={bodyStroke} strokeWidth={0.5} />,
+      <rect key="cled" x={x} y={upBot - ledH} width={w} height={ledH}
+        fill="#ffe08a" stroke="#caa53a" strokeWidth={0.4} opacity={0.95} />,
+
+      // ===== Etiqueta debajo =====
+      <text key="csku" x={cx} y={ground + 14}
+        fontFamily="monospace" fontSize="9" fill="#a86a1c" textAnchor="middle">
+        GLG7000D
+      </text>,
+      <text key="cw" x={cx} y={ground + 25}
+        fontFamily="monospace" fontSize="8" fill="#5a6068" textAnchor="middle"
+        opacity={0.8}>{corner.W}×{corner.W} esquinero</text>,
     ]
     groups.push(<g key="corner">{parts}</g>)
     x += w
@@ -472,6 +492,22 @@ export function ElevationSVG({
               x={0} y={0} width={1052 * sc} height={605 * sc}
               preserveAspectRatio="none" />
           </pattern>
+          {/* Gradient lateral del corner — sugiere profundidad 810mm */}
+          <linearGradient id="cornerShadGrad" x1="0" x2="1" y1="0" y2="0">
+            <stop offset="0%" stopColor="#000" stopOpacity="0" />
+            <stop offset="100%" stopColor="#000" stopOpacity="0.55" />
+          </linearGradient>
+          {/* Panel perforado del corner — luz LED interna (azul translúcido) */}
+          <linearGradient id="cornerPegLedL" x1="1" x2="0" y1="0" y2="0">
+            <stop offset="0%"  stopColor="#5a6f8c" stopOpacity="0.9" />
+            <stop offset="60%" stopColor="#3a4d6b" stopOpacity="0.85" />
+            <stop offset="100%" stopColor="#1c2434" stopOpacity="0.85" />
+          </linearGradient>
+          <linearGradient id="cornerPegLedR" x1="0" x2="1" y1="0" y2="0">
+            <stop offset="0%"  stopColor="#5a6f8c" stopOpacity="0.9" />
+            <stop offset="60%" stopColor="#3a4d6b" stopOpacity="0.85" />
+            <stop offset="100%" stopColor="#1c2434" stopOpacity="0.85" />
+          </linearGradient>
         </defs>
         {overBand}
         <line x1={pad.l} y1={ground} x2={cw - pad.r} y2={ground} stroke="#454c56" strokeWidth={1.5} />

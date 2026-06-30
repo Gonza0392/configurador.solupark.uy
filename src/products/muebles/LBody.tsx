@@ -57,7 +57,6 @@ export function LBody({ state, setState }: Props) {
     setState((s) => ({ ...s, overlays: { ...s.overlays, [key]: !s.overlays[key] } }))
 
   const toggleCorner = () => updateL((L) => ({ corner: !L.corner }))
-  const toggleCornerUpper = () => updateL((L) => ({ cornerUpper: !L.cornerUpper }))
 
   const applyCombo = (composition: Array<{ sku: string; qty: number }>) => {
     const items: string[] = []
@@ -148,21 +147,11 @@ export function LBody({ state, setState }: Props) {
           <h3>Esquinero (el codo)</h3>
           <label className="ov">
             <div>
-              <span>Incluir esquinero</span>
-              <small>{fam.corner!.base} + tapa {fam.corner!.cover}</small>
+              <span>Incluir esquinero GLG7000D</span>
+              <small>pack: {fam.corner!.base} + {fam.corner!.cover} + {fam.corner!.upper} + {fam.corner!.cornerTop} + 2× GLG6008</small>
             </div>
             <span className="sw">
-              <input type="checkbox" checked={L.corner} onChange={toggleCorner} aria-label="Incluir esquinero" />
-              <span></span>
-            </span>
-          </label>
-          <label className="ov">
-            <div>
-              <span>Mueble alto en esquina</span>
-              <small>{fam.corner!.upper}</small>
-            </div>
-            <span className="sw">
-              <input type="checkbox" checked={L.cornerUpper} onChange={toggleCornerUpper} aria-label="Mueble alto en esquina" />
+              <input type="checkbox" checked={L.corner} onChange={toggleCorner} aria-label="Incluir esquinero GLG7000D" />
               <span></span>
             </span>
           </label>

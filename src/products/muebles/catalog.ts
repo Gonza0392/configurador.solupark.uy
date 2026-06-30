@@ -146,13 +146,17 @@ export const FAMILIES: Family[] = [
     ],
   },
   {
+    // El modo L usa columnas GLG6xxx (el corner GLG7000D conecta con la línea
+    // GLG6000 según catálogo oficial: "This item can be connected with GLG6000
+    // series"). Las columnas GLG7xxx quedan disponibles en el catálogo (para
+    // las plantillas A/B/C predefinidas) pero no en la paleta del armado libre.
     id: 'GLG7000',
-    label: 'GLG7000 · en L',
-    columns: ['GLG7013', 'GLG7002', 'GLG7019', 'GLG7003', 'GLG7005', 'GLG7011', 'GLG7012'],
+    label: 'GLG7000 · en L (pared GLG6000 + esquinero)',
+    columns: ['GLG6013', 'GLG6002', 'GLG6003', 'GLG6004', 'GLG6005', 'GLG6011', 'GLG6012'],
     overlays: [
-      { key: 'top',   label: 'Mesada',             sku: 'GLG7006' },
-      { key: 'peg',   label: 'Panel perforado',    sku: 'GLG7009' },
-      { key: 'upper', label: 'Módulos superiores', sku: 'GLG7001' },
+      { key: 'top',   label: 'Working top stainless',  sku: 'GLG6009' },
+      { key: 'peg',   label: 'Panel perforado',        sku: 'GLG6007' },
+      { key: 'upper', label: 'Módulos superiores LED', sku: 'GLG6001' },
     ],
     corner: {
       base: 'GLG7016',

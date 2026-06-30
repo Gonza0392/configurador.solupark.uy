@@ -241,49 +241,74 @@ ${bomLines}${warnLine}`
 }
 
 // ===================== L =====================
-// NOTA: calcL todavía usa la lógica vieja (mesada única distribuida).
-// Se va a actualizar en un hito posterior (alineado con la reescritura de
-// catálogo GLG7000). Por ahora, mantiene la API y devuelve resultados
-// consistentes con el nuevo `state.overlays` (sin 'led').
+// Modelo: pared GLG6000 (columnas en lados A y B) + esquinero GLG7000D.
+//   - El esquinero es un PACK FIJO de 5 piezas (validado contra catálogo
+//     oficial pág. GLG7000D): 7016 base + 7015 tapa + 7014 superior +
+//     7020 mesada esquina + 2 barras espaciadoras (mismas que GLG6008).
+//   - Cada lado se calcula con la misma lógica que `calcRecta`: packing
+//     working top, paneles 1:1 con uppers, conectores 1:1 con paneles.
+//   - El corner NO entra en el cálculo de overlays de cada lado (ya viene
+//     "armado" en el pack GLG7000D).
 
 export function calcL(state: MueblesState): CalcResult {
   const fam = familyById('GLG7000')
   const L = state.L
-  const cornerBaseSku  = fam.corner!.base
-  const cornerCoverSku = fam.corner!.cover
-  const cornerUpperSku = fam.corner!.upper
-  const cornerTopSku   = fam.corner!.cornerTop
-  const cornerW = L.corner ? MODULOS[cornerBaseSku].W : 0
+  const corner = fam.corner!
+  const cornerW = L.corner ? MODULOS[corner.base].W : 0    // 810mm físico de la huella
 
-  const sumW = (items: string[]) => items.reduce((s, sku) => s + (MODULOS[sku]?.W ?? 0), 0)
-  const widthA = cornerW + sumW(L.itemsA)
-  const widthB = cornerW + sumW(L.itemsB)
+  // Suma de anchos efectivos por lado (móvil cuenta como 680mm, no 658).
+  const sumEffW = (items: string[]) =>
+    items.reduce((s, sku) => {
+      const m = MODULOS[sku]
+      return s + (m ? effW(m) : 0)
+    }, 0)
+  const widthA = cornerW + sumEffW(L.itemsA)
+  const widthB = cornerW + sumEffW(L.itemsB)
 
   const counts: Record<string, number> = {}
   const add = (sku: string, q = 1) => { counts[sku] = (counts[sku] || 0) + q }
-  for (const sku of L.itemsA) add(sku)
-  for (const sku of L.itemsB) add(sku)
 
+  // 1) Columnas (bases/torres/móviles) de los dos lados
+  for (const sku of [...L.itemsA, ...L.itemsB]) add(sku)
+
+  // 2) Pack GLG7000D — fijo cuando el corner está activo
   if (L.corner) {
-    add(cornerBaseSku)
-    add(cornerCoverSku)
-    if (state.overlays.top) add(cornerTopSku)
-    if (L.cornerUpper) add(cornerUpperSku)
+    add(corner.base)        // GLG7016
+    add(corner.cover)       // GLG7015
+    add(corner.upper)       // GLG7014
+    add(corner.cornerTop)   // GLG7020
+    add(SKU_CONNECTORS, 2)  // 2 packs GLG6008 (= 2× barra GLG7008 del pack)
   }
 
-  const sideBaseW = (items: string[]) =>
-    items
-      .map((sku) => MODULOS[sku])
-      .filter((m): m is NonNullable<typeof m> => !!m && m.sub !== 'tower')
-      .reduce((s, m) => s + m.W, 0)
+  // 3) Overlays por lado — misma lógica que calcRecta, aplicada a cada lado.
+  const upperMod = MODULOS[SKU_UPPER]
+  let orphanRuns = 0
 
   for (const items of [L.itemsA, L.itemsB]) {
-    const span = sideBaseW(items) + cornerW
-    if (span <= 0) continue
-    for (const slot of fam.overlays) {
-      if (!state.overlays[slot.key]) continue
-      const ov = MODULOS[slot.sku]; if (!ov) continue
-      add(slot.sku, Math.ceil(span / ov.W))
+    const runs = fixedBaseRuns(items)
+
+    // 3a) Working top: pack 2-mod (GLG6009) + 3-mod (GLG6010) por run.
+    if (state.overlays.top) {
+      for (const run of runs) {
+        const pack = packWorkingTop(run.length)
+        if (pack.tops2 > 0) add(SKU_WORKING_TOP_2, pack.tops2)
+        if (pack.tops3 > 0) add(SKU_WORKING_TOP_3, pack.tops3)
+        if (pack.unsupported > 0) orphanRuns += pack.unsupported
+      }
+    }
+
+    // 3b) Paneles + uppers + conectores (1:1 cada conjunto, ancho 680mm).
+    if (upperMod && (state.overlays.peg || state.overlays.upper)) {
+      for (const run of runs) {
+        const runW = run.reduce((s, sku) => { const m = MODULOS[sku]; return s + (m ? effW(m) : 0) }, 0)
+        if (runW <= 0) continue
+        const n = Math.ceil(runW / upperMod.W)
+        if (state.overlays.upper) add(SKU_UPPER, n)
+        if (state.overlays.peg) {
+          add(SKU_PEG_DEFAULT, n)
+          add(SKU_CONNECTORS, n)
+        }
+      }
     }
   }
 
@@ -302,8 +327,11 @@ export function calcL(state: MueblesState): CalcResult {
   const hasAnything = L.itemsA.length > 0 || L.itemsB.length > 0 || L.corner
   const isValid = hasAnything
 
-  const cornerOrder = [cornerBaseSku, cornerCoverSku, cornerUpperSku, cornerTopSku]
-  const order = [...cornerOrder, ...fam.columns, ...fam.overlays.map((o) => o.sku)]
+  const cornerOrder = [corner.base, corner.cover, corner.upper, corner.cornerTop]
+  const order = [...fam.columns, ...cornerOrder,
+                 SKU_WORKING_TOP_2, SKU_WORKING_TOP_3,
+                 SKU_PEG_DEFAULT, 'GLG6006',
+                 SKU_UPPER, SKU_CONNECTORS]
   const rank = (sku: string) => (order.indexOf(sku) === -1 ? 999 : order.indexOf(sku))
   const bom: BomLine[] = Object.keys(counts).sort((a, b) => rank(a) - rank(b)).map((sku) => {
     const m = MODULOS[sku]!
@@ -333,7 +361,7 @@ export function calcL(state: MueblesState): CalcResult {
 
   const spec: SpecRow[] = [
     { k: 'Forma',                   v: 'En L' },
-    { k: 'Familia',                 v: 'GLG7000' },
+    { k: 'Familia',                 v: L.corner ? 'GLG6000 (pared) + GLG7000D (esquinero)' : 'GLG6000 (pared)' },
     { k: 'Lado A',                  v: `${mm(widthA)}${fitA ? '' : ' (excede)'}` },
     { k: 'Lado B',                  v: `${mm(widthB)}${fitB ? '' : ' (excede)'}` },
     { k: 'Pared A / B disponibles', v: `${mm(L.availMmA)} / ${mm(L.availMmB)}` },
@@ -349,11 +377,11 @@ export function calcL(state: MueblesState): CalcResult {
 
   const bomLines = bom.map((b) => `• ${b.sku} ${b.name} ×${b.qty}`).join('\n')
   const whatsappBody =
-`Hola SoluPark! Quiero cotizar esta estación en L (Golden Line GLG7000):
+`Hola SoluPark! Quiero cotizar esta estación en L (Golden Line):
 
 Lado A: ${widthA} mm (pared ${L.availMmA} mm)
 Lado B: ${widthB} mm (pared ${L.availMmB} mm)
-Esquinero: ${L.corner ? (L.cornerUpper ? 'sí + mueble alto' : 'sí') : 'no'}
+Esquinero GLG7000D: ${L.corner ? 'sí' : 'no'}
 Peso: ${nw.toFixed(0)} kg neto / ${gw.toFixed(0)} kg bruto
 Volumen: ${cbm.toFixed(2)} CBM
 
