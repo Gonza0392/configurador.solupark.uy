@@ -59,6 +59,28 @@ export const PRICE_BALDOSA_USD = 4
 export const PRICE_BORDE_USD = 1.2
 export const PRICE_ESQUINA_USD = 1
 
+/** Peso y volumen por unidad — para el badge logístico interno.
+ *  Baldosa: 40×40×1.8 cm de polipropileno.
+ *  Borde: ~40×4×1.8 cm.
+ *  Esquina: ~4×4×1.8 cm.
+ *  Peso neto según ficha técnica; peso bruto asume ~10% de embalaje. */
+export const BALDOSA_KG    = 1.05
+export const BALDOSA_GW_KG = 1.15
+export const BALDOSA_CBM   = 0.40 * 0.40 * 0.018   // = 0.00288 m³
+export const BORDE_KG      = 0.15
+export const BORDE_GW_KG   = 0.17
+export const BORDE_CBM     = 0.40 * 0.04 * 0.018   // = 0.000288 m³
+export const ESQUINA_KG    = 0.05
+export const ESQUINA_GW_KG = 0.06
+export const ESQUINA_CBM   = 0.04 * 0.04 * 0.018   // = 0.0000288 m³
+
+/** IVA Uruguay (tasa básica): 22%. Aplicado sobre el precio sin IVA. */
+export const VAT_RATE = 0.22
+
+/** Tope máximo de dimensiones en metros (garaje comercial grande). */
+export const MAX_LARGO_M = 30
+export const MAX_ANCHO_M = 20
+
 /** SKU base. El SKU final por color es `${SKU_X}-${colorKey}`. */
 export const SKU_BALDOSA = 'PISO-BALDOSA'
 export const SKU_BORDE   = 'PISO-BORDE'

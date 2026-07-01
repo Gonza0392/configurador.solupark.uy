@@ -8,7 +8,7 @@ import {
   colsFor, emptyCorners, fillAllCorners, fillOnlySide, fillPerimeter, makeBorderEdges, makeTiles, resizeBorderEdges, resizeTiles, rowsFor,
   type BrushSlot, type CornerPos, type PisosState, type Side,
 } from './state'
-import type { ColorKey } from './catalog'
+import { MAX_LARGO_M, MAX_ANCHO_M, type ColorKey } from './catalog'
 import './pisos.css'
 
 export function PisosConfigurator(props: ConfiguratorProps<PisosState>) {
@@ -55,7 +55,7 @@ function Personalizar({ state, setState, setStep }: ConfiguratorProps<PisosState
   // ---- Dimensiones (re-aplica diseño activo / resize borderEdges) ----
   const setLargo = (v: number) =>
     setState((s) => {
-      const largo = Math.max(0, v)
+      const largo = Math.min(MAX_LARGO_M, Math.max(0, v))
       const cols = colsFor(largo)
       const rows = rowsFor(s.anchoM)
       const tiles = s.activeDesign
@@ -66,7 +66,7 @@ function Personalizar({ state, setState, setStep }: ConfiguratorProps<PisosState
 
   const setAncho = (v: number) =>
     setState((s) => {
-      const ancho = Math.max(0, v)
+      const ancho = Math.min(MAX_ANCHO_M, Math.max(0, v))
       const cols = colsFor(s.largoM)
       const rows = rowsFor(ancho)
       const tiles = s.activeDesign
@@ -229,13 +229,13 @@ function Personalizar({ state, setState, setStep }: ConfiguratorProps<PisosState
         <div className="form-rows">
           <div className="form-row">
             <label htmlFor="pisos-largo">Largo (m)</label>
-            <input id="pisos-largo" type="number" min={0} step={0.1}
+            <input id="pisos-largo" type="number" min={0} max={MAX_LARGO_M} step={0.1}
               value={state.largoM}
               onChange={(e) => setLargo(parseFloat(e.target.value) || 0)} />
           </div>
           <div className="form-row">
             <label htmlFor="pisos-ancho">Ancho (m)</label>
-            <input id="pisos-ancho" type="number" min={0} step={0.1}
+            <input id="pisos-ancho" type="number" min={0} max={MAX_ANCHO_M} step={0.1}
               value={state.anchoM}
               onChange={(e) => setAncho(parseFloat(e.target.value) || 0)} />
           </div>
