@@ -55,7 +55,12 @@ export function BOM({ calc, onPriceChange, onQuote, onClear }: Props) {
                   <input
                     className="pin" type="number" min={0} step={1}
                     value={b.priceUsd || 0}
-                    onChange={(e) => onPriceChange(b.sku, parseFloat(e.target.value) || 0)}
+                    onChange={(e) => onPriceChange(b.sku, Math.max(0, parseFloat(e.target.value) || 0))}
+                    onBlur={(e) => {
+                      // Si quedó texto inválido en el input, forzar el valor real
+                      const v = Math.max(0, parseFloat(e.target.value) || 0)
+                      if (String(v) !== e.target.value) onPriceChange(b.sku, v)
+                    }}
                     aria-label={`Precio ${b.sku}`}
                   />
                 </td>

@@ -2,7 +2,10 @@ import type { BomLine, CalcResult, Metric, SpecRow } from '../../shell/types'
 import { moneyUsd } from '../../lib/format'
 import {
   COLORS, PRICE_BALDOSA_USD, PRICE_BORDE_USD, PRICE_ESQUINA_USD,
-  TILE_CM, colorByKey,
+  BALDOSA_KG, BALDOSA_GW_KG, BALDOSA_CBM,
+  BORDE_KG, BORDE_GW_KG, BORDE_CBM,
+  ESQUINA_KG, ESQUINA_GW_KG, ESQUINA_CBM,
+  VAT_RATE, TILE_CM, colorByKey,
   skuBaldosaColor, skuBordeColor, skuEsquinaColor,
   type ColorKey,
 } from './catalog'
@@ -46,6 +49,9 @@ export function calcPisos(state: PisosState): CalcResult {
   // BOM: línea por color en orden del catálogo
   const bom: BomLine[] = []
   let totalUsd = 0
+  let totalNwKg = 0
+  let totalGwKg = 0
+  let totalCbm = 0
 
   for (const c of COLORS) {
     const qty = baldosaCounts.get(c.key)
@@ -54,9 +60,12 @@ export function calcPisos(state: PisosState): CalcResult {
     bom.push({
       sku: skuBaldosaColor(c.key),
       name: `Baldosa rejilla 40×40 — ${c.label}`,
-      tag: 'piso', qty, nwKg: 0, priceUsd: p,
+      tag: 'piso', qty, nwKg: BALDOSA_KG, priceUsd: p,
     })
-    totalUsd += qty * p
+    totalUsd  += qty * p
+    totalNwKg += qty * BALDOSA_KG
+    totalGwKg += qty * BALDOSA_GW_KG
+    totalCbm  += qty * BALDOSA_CBM
   }
   for (const c of COLORS) {
     const qty = bordeCounts.get(c.key)
@@ -65,9 +74,12 @@ export function calcPisos(state: PisosState): CalcResult {
     bom.push({
       sku: skuBordeColor(c.key),
       name: `Borde 40 cm — ${c.label}`,
-      tag: 'borde', qty, nwKg: 0, priceUsd: p,
+      tag: 'borde', qty, nwKg: BORDE_KG, priceUsd: p,
     })
-    totalUsd += qty * p
+    totalUsd  += qty * p
+    totalNwKg += qty * BORDE_KG
+    totalGwKg += qty * BORDE_GW_KG
+    totalCbm  += qty * BORDE_CBM
   }
   for (const c of COLORS) {
     const qty = esquinaCounts.get(c.key)
@@ -76,24 +88,38 @@ export function calcPisos(state: PisosState): CalcResult {
     bom.push({
       sku: skuEsquinaColor(c.key),
       name: `Esquina — ${c.label}`,
-      tag: 'esquina', qty, nwKg: 0, priceUsd: p,
+      tag: 'esquina', qty, nwKg: ESQUINA_KG, priceUsd: p,
     })
-    totalUsd += qty * p
+    totalUsd  += qty * p
+    totalNwKg += qty * ESQUINA_KG
+    totalGwKg += qty * ESQUINA_GW_KG
+    totalCbm  += qty * ESQUINA_CBM
   }
 
   const isValid = totalTiles > 0
   const distinctTileColors = baldosaCounts.size
 
+  // IVA 22%
+  const priceVat = totalUsd * VAT_RATE
+  const priceGross = totalUsd + priceVat
+
   const metrics: Metric[] = [
     { key: 'Baldosas',     value: totalTiles.toString(),                  tone: totalTiles > 0 ? 'neutral' : 'empty' },
-    { key: 'Área cubierta', value: areaCubiertaM2.toFixed(2), sub: 'm²',  tone: totalTiles > 0 ? 'ok' : 'empty' },
-    { key: 'Cuadrícula',    value: `${cols} × ${rows}`,                   tone: totalTiles > 0 ? 'neutral' : 'empty' },
+    { key: isExact ? 'Área cubierta' : 'Área cubierta (con cortes)',
+      value: areaCubiertaM2.toFixed(2), sub: 'm²',
+      tone: totalTiles > 0 ? 'ok' : 'empty' },
+    { key: 'Área pedida',   value: areaPedidaM2.toFixed(2), sub: 'm²',    tone: totalTiles > 0 ? 'neutral' : 'empty' },
+    { key: 'Cuadrícula',
+      value: (cols === 0 || rows === 0) ? '—' : `${cols} × ${rows}`,
+      tone: totalTiles > 0 ? 'neutral' : 'empty' },
     { key: 'Colores',       value: distinctTileColors.toString(),         tone: distinctTileColors > 1 ? 'ok' : 'neutral' },
     { key: 'Bordes + esq.',
       value: anyBorde(state.borderEdges) || anyCorner(state.cornerColors)
         ? `${bordes} + ${esquinas}` : 'No',
       tone: bordes + esquinas > 0 ? 'neutral' : 'empty' },
-    { key: 'Precio total',  value: moneyUsd(totalUsd),                    tone: totalUsd > 0 ? 'neutral' : 'empty' },
+    { key: 'Subtotal (sin IVA)', value: moneyUsd(totalUsd),   tone: totalUsd > 0 ? 'neutral' : 'empty' },
+    { key: 'IVA 22%',            value: moneyUsd(priceVat),   tone: totalUsd > 0 ? 'neutral' : 'empty' },
+    { key: 'Total c/ IVA',       value: moneyUsd(priceGross), tone: totalUsd > 0 ? 'neutral' : 'empty' },
   ]
 
   // Spec
@@ -183,7 +209,7 @@ ${esquinaWa}`
   return {
     bom, metrics, spec,
     totalPriceUsd: totalUsd,
-    totalNwKg: 0, totalGwKg: 0, totalCbm: 0,
+    totalNwKg, totalGwKg, totalCbm,
     whatsappBody, isValid,
     invalidReason: 'Ingresá largo y ancho mayores a 0.',
   }
